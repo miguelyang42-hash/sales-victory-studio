@@ -1,0 +1,699 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>销售战报中心 · 战报后台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eaf6ff;
+      --surface: rgba(255, 255, 255, 0.76);
+      --surface-solid: #ffffff;
+      --ink: #13243a;
+      --muted: #667d94;
+      --line: rgba(74, 120, 155, 0.2);
+      --blue: #087ff2;
+      --blue-deep: #0764c6;
+      --danger: #c5323a;
+      --shadow: 0 18px 48px rgba(49, 96, 132, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, #dff2ff 0%, #f3f9fd 48%, #e9f5fc 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    button, input, textarea { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      padding: 12px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.92);
+      background: rgba(242, 250, 255, 0.72);
+      box-shadow: 0 10px 34px rgba(67, 112, 146, 0.1);
+      backdrop-filter: blur(24px) saturate(150%);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-logo {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255, 255, 255, 0.96);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 8px 22px rgba(45, 91, 124, 0.14);
+    }
+    .brand-logo img { width: 32px; height: 25px; object-fit: contain; }
+    .brand strong { display: block; font-size: 17px; }
+    .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+    .top-actions { display: flex; gap: 8px; }
+    .btn {
+      min-height: 40px;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--ink);
+      font-weight: 750;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .btn:hover { border-color: rgba(8, 127, 242, 0.38); }
+    .btn-primary { border-color: transparent; background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--blue-deep); }
+    .btn-danger { color: var(--danger); }
+    .btn-small { min-height: 34px; padding: 0 11px; font-size: 12px; }
+
+    .shell { width: min(1440px, calc(100% - 32px)); margin: 22px auto 40px; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .metric {
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.94);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+    .metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .metric strong { display: block; margin-top: 7px; font-size: 25px; line-height: 1; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid rgba(255, 255, 255, 0.94);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px) saturate(145%);
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 64px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-header h1, .panel-header h2 { margin: 0; font-size: 18px; }
+    .panel-header-copy { min-width: 0; }
+    .panel-header-hint { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .panel-body { padding: 18px; }
+
+    .form-grid { display: grid; gap: 14px; }
+    .field { display: grid; gap: 7px; }
+    .field label { font-size: 12px; font-weight: 800; color: #34495f; }
+    .text-input, .search-input, textarea {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+      outline: none;
+    }
+    .text-input:focus, .search-input:focus, textarea:focus {
+      border-color: rgba(8, 127, 242, 0.7);
+      box-shadow: 0 0 0 3px rgba(8, 127, 242, 0.12);
+    }
+
+    .photo-picker {
+      position: relative;
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      align-items: center;
+      gap: 13px;
+      min-height: 92px;
+      padding: 9px;
+      border: 1px dashed rgba(52, 107, 148, 0.34);
+      border-radius: 8px;
+      background: rgba(239, 248, 254, 0.72);
+      cursor: pointer;
+    }
+    .photo-picker input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .photo-preview { width: 76px; height: 76px; border-radius: 8px; object-fit: cover; background: #dcebf5; }
+    .photo-picker strong { display: block; font-size: 13px; }
+    .photo-picker span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+
+    .range-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; gap: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--blue); }
+    .form-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    [hidden] { display: none !important; }
+
+    .employee-list { display: grid; gap: 8px; margin-top: 18px; }
+    .employee-row {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 11px;
+      min-height: 64px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+    .employee-row img { width: 48px; height: 48px; border-radius: 7px; object-fit: cover; }
+    .employee-row strong { font-size: 14px; }
+    .employee-row span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .employee-actions { display: flex; align-items: center; gap: 6px; }
+    .btn-edit { color: var(--blue-deep); }
+
+    .history-tools { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .tabs { display: inline-flex; padding: 3px; border-radius: 8px; background: #e4f1fa; }
+    .tabs button { min-height: 34px; padding: 0 13px; border: 0; border-radius: 6px; background: transparent; color: #557087; font-weight: 750; }
+    .tabs button.is-active { background: #fff; color: var(--blue-deep); box-shadow: 0 4px 12px rgba(47, 91, 123, 0.12); }
+    .search-input { width: min(230px, 100%); min-height: 40px; }
+
+    .history-list { display: grid; gap: 10px; }
+    .history-row {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.75);
+    }
+    .history-thumb { width: 104px; height: 72px; border-radius: 7px; object-fit: cover; background: #dcebf5; }
+    .copy-mark { display: grid; place-items: center; width: 104px; height: 72px; border-radius: 7px; background: #e6f3fb; color: var(--blue-deep); font-size: 13px; font-weight: 850; }
+    .history-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .history-title strong { font-size: 15px; }
+    .tag { padding: 3px 7px; border-radius: 5px; background: #e7f4fd; color: #17699e; font-size: 11px; font-weight: 750; }
+    .history-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 7px; color: var(--muted); font-size: 12px; }
+    .history-copy { margin-top: 7px; color: #40576d; font-size: 12px; line-height: 1.55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .empty { padding: 54px 20px; text-align: center; color: var(--muted); }
+
+    dialog {
+      width: min(940px, calc(100% - 28px));
+      max-height: calc(100vh - 40px);
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.96);
+      border-radius: 8px;
+      background: #f7fbfe;
+      box-shadow: 0 28px 80px rgba(28, 64, 92, 0.28);
+    }
+    dialog::backdrop { background: rgba(22, 47, 68, 0.38); backdrop-filter: blur(6px); }
+    .dialog-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .dialog-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr); gap: 14px; padding: 16px; overflow: auto; }
+    .dialog-image { width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; background: #dcebf5; }
+    .dialog-copy { min-height: 320px; resize: vertical; line-height: 1.65; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 30;
+      transform: translate(-50%, 16px);
+      padding: 11px 16px;
+      border-radius: 8px;
+      background: rgba(27, 53, 76, 0.94);
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      transition: 160ms ease;
+    }
+    .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 980px) {
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .topbar { align-items: flex-start; padding: 10px 12px; }
+      .top-actions { flex-direction: column; }
+      .shell { width: min(100% - 20px, 1440px); margin-top: 12px; }
+      .summary { gap: 8px; }
+      .metric { padding: 14px; }
+      .history-row { grid-template-columns: 76px minmax(0, 1fr); }
+      .history-thumb, .copy-mark { width: 76px; height: 58px; }
+      .history-actions { grid-column: 1 / -1; justify-content: flex-start; }
+      .employee-actions { flex-direction: column; align-items: stretch; }
+      .dialog-body { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo"><img src="assets/brand-logo.png" alt=""></div>
+      <div><strong>销售战报中心 · 战报后台</strong><span>Sales Victory Studio Management</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="refreshButton" type="button">刷新数据</button>
+      <a class="btn btn-primary" href="index.html">返回生成器</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="summary" aria-label="数据概览">
+      <div class="metric"><span>员工数量</span><strong id="employeeCount">0</strong></div>
+      <div class="metric"><span>战报记录</span><strong id="reportCount">0</strong></div>
+      <div class="metric"><span>文案记录</span><strong id="copyCount">0</strong></div>
+      <div class="metric"><span>累计出单人民币</span><strong id="totalAmount">¥0.00</strong></div>
+    </section>
+
+    <div class="workspace">
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-header-copy">
+            <h1 id="employeePanelTitle">员工管理</h1>
+            <p class="panel-header-hint" id="employeeFormHint">新增员工，或从下方列表选择员工进行编辑</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form class="form-grid" id="employeeForm">
+            <div class="field">
+              <label for="employeeName">员工姓名</label>
+              <input class="text-input" id="employeeName" maxlength="30" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="employeePhoto">员工照片</label>
+              <label class="photo-picker">
+                <input id="employeePhoto" type="file" accept="image/png,image/jpeg,image/webp">
+                <img class="photo-preview" id="photoPreview" src="assets/placeholder-avatar.png" alt="照片预览">
+                <span><strong>选择员工照片</strong><span id="photoName">PNG、JPG、WebP</span></span>
+              </label>
+            </div>
+            <div class="field">
+              <label for="photoFocus">头像垂直焦点</label>
+              <div class="range-row">
+                <input id="photoFocus" type="range" min="5" max="90" value="20">
+                <output id="photoFocusValue">20%</output>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="employeeSubmitButton" type="submit">添加员工</button>
+              <button class="btn" id="cancelEditButton" type="button" hidden>取消编辑</button>
+            </div>
+          </form>
+          <div class="employee-list" id="employeeList"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>历史记录</h2>
+          <div class="history-tools">
+            <div class="tabs" id="historyTabs">
+              <button class="is-active" type="button" data-tab="reports">战报</button>
+              <button type="button" data-tab="copies">文案</button>
+            </div>
+            <input class="search-input" id="historySearch" type="search" placeholder="搜索员工或客户">
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="recordDialog">
+    <div class="dialog-head">
+      <strong id="dialogTitle">战报详情</strong>
+      <button class="btn btn-small" id="closeDialogButton" type="button">关闭</button>
+    </div>
+    <div class="dialog-body">
+      <img class="dialog-image" id="dialogImage" alt="战报图片">
+      <div>
+        <textarea class="dialog-copy" id="dialogCopy" readonly></textarea>
+        <button class="btn btn-primary" id="dialogCopyButton" type="button">复制文案</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const state = { employees: [], reports: [], copies: [], tab: "reports", search: "", photoData: "", editingEmployeeId: null };
+    const employeeList = document.getElementById("employeeList");
+    const historyList = document.getElementById("historyList");
+    const employeeForm = document.getElementById("employeeForm");
+    const employeeName = document.getElementById("employeeName");
+    const employeePhoto = document.getElementById("employeePhoto");
+    const photoPreview = document.getElementById("photoPreview");
+    const photoName = document.getElementById("photoName");
+    const photoFocus = document.getElementById("photoFocus");
+    const photoFocusValue = document.getElementById("photoFocusValue");
+    const employeePanelTitle = document.getElementById("employeePanelTitle");
+    const employeeFormHint = document.getElementById("employeeFormHint");
+    const employeeSubmitButton = document.getElementById("employeeSubmitButton");
+    const cancelEditButton = document.getElementById("cancelEditButton");
+    const recordDialog = document.getElementById("recordDialog");
+    const dialogImage = document.getElementById("dialogImage");
+    const dialogCopy = document.getElementById("dialogCopy");
+    const toast = document.getElementById("toast");
+    let toastTimer = null;
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("is-visible");
+      toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2200);
+    }
+
+    function sessionAdminKey() {
+      let key = sessionStorage.getItem("svs_admin_key") || "";
+      if (!key) {
+        key = window.prompt("请输入管理员密钥（仅保存在当前浏览器会话）") || "";
+        if (key) sessionStorage.setItem("svs_admin_key", key);
+      }
+      return key;
+    }
+
+    async function api(url, options = {}) {
+      const method = String(options.method || "GET").toUpperCase();
+      const headers = { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) };
+      if (method !== "GET" && method !== "HEAD") {
+        const key = sessionAdminKey();
+        if (key) headers["x-admin-key"] = key;
+      }
+      const response = await fetch(url, { cache: "no-store", ...options, headers });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "请求失败");
+      return result;
+    }
+
+    function formatRmb(value) {
+      return `¥${(Number(value) || 0).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function formatTime(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function createButton(text, className, handler) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = className;
+      button.textContent = text;
+      button.addEventListener("click", handler);
+      return button;
+    }
+
+    function renderSummary(summary) {
+      document.getElementById("employeeCount").textContent = summary.employees || 0;
+      document.getElementById("reportCount").textContent = summary.reports || 0;
+      document.getElementById("copyCount").textContent = summary.copies || 0;
+      document.getElementById("totalAmount").textContent = formatRmb(summary.totalAmountRmb);
+    }
+
+    function resetEmployeeForm() {
+      employeeForm.reset();
+      state.photoData = "";
+      state.editingEmployeeId = null;
+      photoPreview.src = "assets/placeholder-avatar.png";
+      photoPreview.style.objectPosition = "center 20%";
+      photoName.textContent = "PNG、JPG、WebP";
+      photoFocus.value = "20";
+      photoFocusValue.textContent = "20%";
+      employeePanelTitle.textContent = "员工管理";
+      employeeFormHint.textContent = "新增员工，或从下方列表选择员工进行编辑";
+      employeeSubmitButton.textContent = "添加员工";
+      cancelEditButton.hidden = true;
+    }
+
+    function startEmployeeEdit(employee) {
+      state.editingEmployeeId = employee.id;
+      state.photoData = "";
+      employeeName.value = employee.name;
+      employeePhoto.value = "";
+      photoPreview.src = employee.image;
+      const focusPercent = Math.round((employee.positionY || 0.2) * 100);
+      photoPreview.style.objectPosition = `center ${focusPercent}%`;
+      photoFocus.value = String(focusPercent);
+      photoFocusValue.textContent = `${focusPercent}%`;
+      photoName.textContent = "保留当前照片，选择文件可替换";
+      employeePanelTitle.textContent = `编辑员工 · ${employee.name}`;
+      employeeFormHint.textContent = "姓名、照片和头像焦点均可修改";
+      employeeSubmitButton.textContent = "保存修改";
+      cancelEditButton.hidden = false;
+      employeeName.focus();
+      employeeForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderEmployees() {
+      employeeList.replaceChildren();
+      state.employees.forEach((employee) => {
+        const row = document.createElement("div");
+        row.className = "employee-row";
+        const image = document.createElement("img");
+        image.src = employee.image;
+        image.alt = employee.name;
+        image.style.objectPosition = `center ${Math.round((employee.positionY || 0.2) * 100)}%`;
+        const copy = document.createElement("div");
+        const name = document.createElement("strong");
+        name.textContent = employee.name;
+        const meta = document.createElement("span");
+        meta.textContent = employee.updatedAt
+          ? `更新于 ${formatTime(employee.updatedAt)}`
+          : employee.createdAt
+            ? `添加于 ${formatTime(employee.createdAt)}`
+            : "内置员工";
+        copy.append(name, meta);
+        const actions = document.createElement("div");
+        actions.className = "employee-actions";
+        const edit = createButton("编辑", "btn btn-small btn-edit", () => startEmployeeEdit(employee));
+        const remove = createButton("删除", "btn btn-small btn-danger", async () => {
+          if (!confirm(`确认删除员工“${employee.name}”？`)) return;
+          try {
+            await api(`/api/employees/${encodeURIComponent(employee.id)}`, { method: "DELETE" });
+            if (state.editingEmployeeId === employee.id) resetEmployeeForm();
+            showToast("员工已删除");
+            await loadAll();
+          } catch (error) {
+            showToast(error.message);
+          }
+        });
+        actions.append(edit, remove);
+        row.append(image, copy, actions);
+        employeeList.append(row);
+      });
+    }
+
+    function openRecord(record, isReport) {
+      document.getElementById("dialogTitle").textContent = `${record.employeeName || "员工"} · ${record.reportDate || "记录"}`;
+      dialogImage.hidden = !isReport;
+      dialogImage.src = isReport ? record.image : "";
+      dialogCopy.value = record.copyText || "";
+      recordDialog.showModal();
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+      const area = document.createElement("textarea");
+      area.value = text;
+      document.body.append(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      return Promise.resolve();
+    }
+
+    function renderHistory() {
+      historyList.replaceChildren();
+      const source = state.tab === "reports" ? state.reports : state.copies;
+      const needle = state.search.trim().toLowerCase();
+      const records = source.filter((record) => !needle || [record.employeeName, record.customer, record.reportDate, record.copyText]
+        .some((value) => String(value || "").toLowerCase().includes(needle)));
+
+      if (!records.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = state.tab === "reports" ? "暂无战报记录" : "暂无文案记录";
+        historyList.append(empty);
+        return;
+      }
+
+      records.forEach((record) => {
+        const isReport = state.tab === "reports";
+        const row = document.createElement("article");
+        row.className = "history-row";
+        const visual = isReport ? document.createElement("img") : document.createElement("div");
+        if (isReport) {
+          visual.className = "history-thumb";
+          visual.src = record.image;
+          visual.alt = `${record.employeeName} 战报`;
+        } else {
+          visual.className = "copy-mark";
+          visual.textContent = "文案";
+        }
+
+        const content = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "history-title";
+        const employee = document.createElement("strong");
+        employee.textContent = record.employeeName || "员工";
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = record.customer || "客户";
+        title.append(employee, tag);
+        const meta = document.createElement("div");
+        meta.className = "history-meta";
+        const metaItems = [record.reportDate, formatRmb(record.amountRmb), `累积 ${formatRmb(record.cumulativeRmb)}`, formatTime(record.createdAt)];
+        metaItems.filter(Boolean).forEach((item) => {
+          const span = document.createElement("span");
+          span.textContent = item;
+          meta.append(span);
+        });
+        const copy = document.createElement("div");
+        copy.className = "history-copy";
+        copy.textContent = record.copyText || "未保存文案";
+        content.append(title, meta, copy);
+
+        const actions = document.createElement("div");
+        actions.className = "history-actions";
+        actions.append(createButton("查看", "btn btn-small", () => openRecord(record, isReport)));
+        actions.append(createButton("复制文案", "btn btn-small", async () => {
+          await copyText(record.copyText || "");
+          showToast("文案已复制");
+        }));
+        if (isReport) {
+          const download = document.createElement("a");
+          download.className = "btn btn-small";
+          download.href = record.image;
+          download.download = `销售战报中心战报-${record.employeeName || "员工"}-${record.reportDate || ""}.png`;
+          download.textContent = "下载";
+          actions.append(download);
+        }
+        actions.append(createButton("删除", "btn btn-small btn-danger", async () => {
+          if (!confirm("确认删除这条记录？")) return;
+          try {
+            await api(`/api/${isReport ? "reports" : "copies"}/${encodeURIComponent(record.id)}`, { method: "DELETE" });
+            showToast("记录已删除");
+            await loadAll();
+          } catch (error) {
+            showToast(error.message);
+          }
+        }));
+        row.append(visual, content, actions);
+        historyList.append(row);
+      });
+    }
+
+    async function loadAll() {
+      try {
+        const [employees, reports, copies, summary] = await Promise.all([
+          api("/api/employees"),
+          api("/api/reports?limit=500"),
+          api("/api/copies?limit=500"),
+          api("/api/summary")
+        ]);
+        state.employees = employees;
+        state.reports = reports;
+        state.copies = copies;
+        if (state.editingEmployeeId && !employees.some((employee) => employee.id === state.editingEmployeeId)) {
+          resetEmployeeForm();
+        }
+        renderSummary(summary);
+        renderEmployees();
+        renderHistory();
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    employeePhoto.addEventListener("change", () => {
+      const file = employeePhoto.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.photoData = reader.result;
+        photoPreview.src = reader.result;
+        photoName.textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    photoFocus.addEventListener("input", () => {
+      photoFocusValue.textContent = `${photoFocus.value}%`;
+      photoPreview.style.objectPosition = `center ${photoFocus.value}%`;
+    });
+
+    employeeForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = employeeName.value.trim();
+      const isEditing = Boolean(state.editingEmployeeId);
+      if (!name || (!isEditing && !state.photoData)) {
+        showToast(isEditing ? "请填写员工姓名" : "请填写姓名并选择照片");
+        return;
+      }
+      try {
+        const payload = { name, positionY: Number(photoFocus.value) / 100 };
+        if (state.photoData) payload.imageData = state.photoData;
+        await api(isEditing ? `/api/employees/${encodeURIComponent(state.editingEmployeeId)}` : "/api/employees", {
+          method: isEditing ? "PATCH" : "POST",
+          body: JSON.stringify(payload)
+        });
+        resetEmployeeForm();
+        showToast(isEditing ? "员工资料已更新" : "员工已添加");
+        await loadAll();
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+
+    cancelEditButton.addEventListener("click", resetEmployeeForm);
+
+    document.getElementById("historyTabs").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-tab]");
+      if (!button) return;
+      state.tab = button.dataset.tab;
+      document.querySelectorAll("#historyTabs button").forEach((item) => item.classList.toggle("is-active", item === button));
+      renderHistory();
+    });
+
+    document.getElementById("historySearch").addEventListener("input", (event) => {
+      state.search = event.target.value;
+      renderHistory();
+    });
+    document.getElementById("refreshButton").addEventListener("click", loadAll);
+    document.getElementById("closeDialogButton").addEventListener("click", () => recordDialog.close());
+    document.getElementById("dialogCopyButton").addEventListener("click", async () => {
+      await copyText(dialogCopy.value);
+      showToast("文案已复制");
+    });
+
+    loadAll();
+  </script>
+</body>
+</html>
+

@@ -1,18 +1,4449 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Sales Victory Studio 销售战报生成器"><title>销售战报中心 · Sales Victory Studio</title><style>
-:root{--bg:#07111f;--panel:#101d30;--line:#243a53;--text:#eef6ff;--muted:#91a5bd;--accent:#45e0be;--gold:#f5c96b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#123759 0,#07111f 42%,#040913 100%);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Microsoft YaHei",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.shell{max-width:1500px;margin:auto;padding:20px 24px 50px}.top{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}.brand{display:flex;align-items:center;gap:12px}.mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#2787d9);display:grid;place-items:center;color:#06121d;font-weight:900;font-size:20px}.brand h1{font-size:20px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{padding:10px 14px;border-radius:10px;color:var(--text);background:#182b42;border:1px solid var(--line)}.btn.primary{background:linear-gradient(135deg,#38cfae,#247dc7);color:#03131d;font-weight:800}.btn.warn{background:#3a2d16;color:#ffe1a0}.layout{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px}.card{background:linear-gradient(145deg,rgba(18,34,54,.96),rgba(9,20,35,.96));border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 18px 50px #0005}.section{margin-bottom:18px}.section h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 10px}.employees{display:flex;gap:10px;flex-wrap:wrap}.employee{min-width:120px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#0d1a2b;color:var(--text);text-align:left}.employee.active{border-color:var(--accent);box-shadow:0 0 0 2px #45e0be33}.employee small{display:block;color:var(--muted);margin-top:4px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;background:#081625;border:1px solid var(--line);color:var(--text);padding:10px;border-radius:9px;outline:0}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}.templates{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.template{padding:12px 8px;border:1px solid var(--line);border-radius:10px;background:#0b1727;color:var(--muted)}.template.active{border-color:var(--gold);color:var(--gold);background:#382a1533}.preview-wrap{position:sticky;top:18px}.canvas-box{min-height:500px;display:grid;place-items:center;background:#050b13;border-radius:14px;padding:14px;border:1px solid #243a53}.canvas-box canvas{max-width:100%;max-height:70vh;border-radius:8px;box-shadow:0 10px 35px #0008}.preview-tools{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.hint{color:var(--muted);font-size:12px}.status{margin-top:12px;min-height:20px;color:var(--accent)}.history{margin-top:20px}.row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #1c3046}.row span{color:var(--muted)}@media(max-width:1000px){.layout{grid-template-columns:1fr}.preview-wrap{position:static}.canvas-box canvas{max-height:none}}@media(max-width:600px){.shell{padding:12px}.top{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions .btn{flex:1}.grid{grid-template-columns:1fr}.templates{grid-template-columns:repeat(2,1fr)}.card{padding:14px}.canvas-box{min-height:320px}}
-</style></head><body><main class="shell"><header class="top"><div class="brand"><div class="mark">XP</div><div><h1>销售战报中心</h1><p>Sales Victory Studio · V1.0</p></div></div><div class="actions"><button class="btn" id="reset">重置</button><button class="btn" id="copyImage">复制图片</button><button class="btn" id="save">保存战报</button><button class="btn primary" id="download">下载 PNG</button></div></header><div class="layout"><section class="card"><div class="section"><h2>出单英雄</h2><div class="employees" id="employees"></div></div><div class="section grid"><div class="field"><label>开单金额</label><input id="amount" type="number" min="0" step="0.01" value="1000"></div><div class="field"><label>币种</label><select id="currency"><option>USD</option><option>RMB</option></select></div><div class="field"><label>累积金额</label><input id="cumulativeAmount" type="number" min="0" step="0.01" value="1000"></div><div class="field"><label>累积币种</label><select id="cumulativeCurrency"><option>USD</option><option>RMB</option></select></div><div class="field"><label>客户类型</label><select id="customer"><option>新客户</option><option>老客户</option></select></div><div class="field"><label>战报日期</label><input id="date" type="date"></div></div><div class="section"><h2>画布比例</h2><div class="actions" id="ratios"><button class="btn" data-ratio="portrait">竖版 1080×1440</button><button class="btn" data-ratio="square">方形 1200×1200</button><button class="btn" data-ratio="landscape">横版 1600×900</button></div></div><div class="section"><h2>战报模板</h2><div class="templates" id="templates"></div></div><div class="section grid"><div class="field"><label>订单截图</label><input id="screenshot" type="file" accept="image/png,image/jpeg,image/webp"></div><div class="field"><label>截图适配</label><select id="fit"><option value="cover">智能铺满</option><option value="contain">完整显示</option></select></div></div><div class="section"><h2>开单文案</h2><textarea id="copyText" rows="7"></textarea><div class="preview-tools"><button class="btn" id="newCopy">生成新文案</button><button class="btn" id="copyTextBtn">复制文案</button></div></div><div class="field"><label>管理员密钥（仅保存/删除需要，浏览器不会自动提交到第三方）</label><input id="adminKey" type="password" autocomplete="off" placeholder="x-admin-key"></div><div class="status" id="status"></div></section><aside class="card preview-wrap"><h2>实时预览</h2><div class="canvas-box"><canvas id="canvas"></canvas></div><p class="hint">生成、保存、下载均复用同一 Canvas；截图只在提交保存时传输。</p><div class="history"><h2>最近战报</h2><div id="history"><span class="hint">加载中…</span></div></div></aside></div></main><script>
-const themes={emeraldLaurel:['翡翠荣耀','#073b34','#42e0b0'],techBlue:['科技蓝光','#061d4a','#50b7ff'],luxuryBlack:['鎏金荣耀','#21150a','#f5c96b'],flameRed:['烈焰战魂','#4b1114','#ff806d'],auroraMint:['极光星海','#092f3a','#76f5d2'],nebulaViolet:['紫曜银河','#281450','#d09aff'],glacierSilver:['冰川银辉','#223344','#dcefff'],roseObsidian:['玫瑰曜石','#3a1729','#ff9cc4']};
-const ratioSize={portrait:[1080,1440],square:[1200,1200],landscape:[1600,900]};let s={employee:null,employees:[],amount:'1000',currency:'USD',cumulativeAmount:'1000',cumulativeCurrency:'USD',customer:'新客户',date:new Date().toISOString().slice(0,10),ratio:'landscape',theme:'emeraldLaurel',fit:'cover',screenshot:null,screenshotName:'',copyVersion:0};
-const $=id=>document.getElementById(id), api=async(path,opt={})=>{const r=await fetch('/api/'+path,{cache:'no-store',...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}});const p=await r.json().catch(()=>({}));if(!r.ok)throw Error(p.error||'请求失败');return p};
-function money(v,c){return `${c==='USD'?'$':'¥'}${Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`};function rmb(v,c){return Number(v||0)*(c==='USD'?6.7:1)}
-function makeCopy(){const date=s.date&&/^\d{4}-\d{2}-\d{2}$/.test(s.date)?new Date(`${s.date}T00:00:00`):new Date();const month=date.getMonth()+1;return `🔥【AI大赢家】🔥\n🌟 出单英雄：${s.employee?.name||'销售英雄'}\n💰 本次出单：RMB ${rmb(s.amount,s.currency).toLocaleString('zh-CN',{minimumFractionDigits:2})}\n⚡ 累积金额：RMB ${rmb(s.cumulativeAmount,s.cumulativeCurrency).toLocaleString('zh-CN',{minimumFractionDigits:2})}\n🤗 客户性质：${s.customer}\n\n火力全开，再创佳绩！\n热烈恭喜 ${s.employee?.name||'销售英雄'} 成功拿下${month}月${s.customer}订单，信任再加码！🔥\n保持冲锋姿态，向着更高目标全力冲刺！🚀`}
-function draw(){const [w,h]=ratioSize[s.ratio];const c=$('canvas'),x=c.getContext('2d');c.width=w;c.height=h;const [label,bg,accent]=themes[s.theme];x.fillStyle=bg;x.fillRect(0,0,w,h);const g=x.createRadialGradient(w*.75,h*.2,20,w*.75,h*.2,w*.8);g.addColorStop(0,accent+'99');g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,w,h);x.strokeStyle=accent;x.lineWidth=Math.max(5,w/250);x.strokeRect(w*.035,h*.035,w*.93,h*.93);x.fillStyle='#ffffff';x.font=`900 ${w/17}px system-ui`;x.fillText('XPBS',w*.08,h*.15);x.fillStyle=accent;x.font=`700 ${w/38}px system-ui`;x.fillText('VICTORY BULLETIN',w*.08,h*.2);x.fillStyle='#fff';x.font=`900 ${w/15}px system-ui`;x.fillText(label,w*.08,h*.35);x.font=`800 ${w/21}px system-ui`;x.fillText(s.employee?.name||'销售英雄',w*.08,h*.45);x.fillStyle=accent;x.font=`900 ${w/13}px system-ui`;x.fillText(money(s.amount,s.currency),w*.08,h*.6);x.fillStyle='#dce9f4';x.font=`600 ${w/29}px system-ui`;x.fillText(`累计 ${money(s.cumulativeAmount,s.cumulativeCurrency)} · ${s.customer}`,w*.08,h*.68);x.fillText(s.date,w*.08,h*.75);if(s.screenshot){const iw=s.screenshot.naturalWidth,ih=s.screenshot.naturalHeight,boxW=w*.3,boxH=h*.38,scale=s.fit==='contain'?Math.min(boxW/iw,boxH/ih):Math.max(boxW/iw,boxH/ih),dw=iw*scale,dh=ih*scale;x.save();x.beginPath();x.roundRect(w*.62,h*.3,boxW,boxH,20);x.clip();x.drawImage(s.screenshot,w*.62+(boxW-dw)/2,h*.3+(boxH-dh)/2,dw,dh);x.restore()} }
-function render(){const e=$('employees');e.innerHTML=s.employees.map(v=>`<button class="employee ${s.employee?.id===v.id?'active':''}" data-id="${v.id}">${v.name}<small>销售英雄</small></button>`).join('');e.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{s.employee=s.employees.find(v=>v.id===b.dataset.id);render();draw();});$('templates').innerHTML=Object.entries(themes).map(([k,v])=>`<button class="template ${s.theme===k?'active':''}" data-theme="${k}">${v[0]}</button>`).join('');$('templates').querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{s.theme=b.dataset.theme;render();draw();});$('copyText').value=makeCopy();document.querySelectorAll('#ratios [data-ratio]').forEach(b=>{b.classList.toggle('primary',b.dataset.ratio===s.ratio);b.onclick=()=>{s.ratio=b.dataset.ratio;render();draw()}})}
-function sync(){['amount','currency','cumulativeAmount','cumulativeCurrency','customer','date','fit'].forEach(k=>{const el=$(k);if(k==='date'&&!el.value){el.value=s.date||new Date().toISOString().slice(0,10)}s[k]=el.value;el.oninput=()=>{s[k]=el.value||new Date().toISOString().slice(0,10);draw();$('copyText').value=makeCopy()}})}
-async function blobData(){return new Promise((ok,no)=>$('canvas').toBlob(b=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)},'image/png'))}
-async function saveReport(){const key=$('adminKey').value;if(!key)return setStatus('保存需要管理员密钥');setStatus('正在保存…');try{const imageData=await blobData();await api('reports',{method:'POST',headers:{'x-admin-key':key},body:JSON.stringify({employeeId:s.employee?.id,employeeName:s.employee?.name,amount:s.amount,currency:s.currency,amountRmb:rmb(s.amount,s.currency),cumulativeAmount:s.cumulativeAmount,cumulativeCurrency:s.cumulativeCurrency,cumulativeRmb:rmb(s.cumulativeAmount,s.cumulativeCurrency),customer:s.customer,reportDate:s.date,ratio:s.ratio,theme:s.theme,screenshotName:s.screenshotName,copyText:$('copyText').value,imageData})});setStatus('战报已保存');loadHistory()}catch(e){setStatus(e.message)}}
-function setStatus(t){$('status').textContent=t;setTimeout(()=>{$('status').textContent=''},4500)}
-async function loadHistory(){try{const rows=await api('reports?limit=8');$('history').innerHTML=rows.length?rows.map(x=>`<div class="row"><b>${x.employeeName||'—'}</b><span>${x.reportDate||''} · ${money(x.amount,x.currency)}</span></div>`).join(''):'<span class="hint">暂无历史战报</span>'}catch(e){$('history').textContent=e.message}}
-$('download').onclick=async()=>{const a=document.createElement('a');a.href=await blobData();a.download=`销售战报中心战报-${s.employee?.name||'英雄'}-${s.date.replaceAll('-','')}.png`;a.click();await saveReport()};$('save').onclick=saveReport;$('copyImage').onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':await new Promise(r=>$('canvas').toBlob(r,'image/png'))})]);setStatus('战报图片已复制')}catch{setStatus('当前浏览器不支持图片复制，请下载 PNG')}};$('copyTextBtn').onclick=async()=>{await navigator.clipboard.writeText($('copyText').value);setStatus('文案已复制')};$('newCopy').onclick=()=>{$('copyText').value=makeCopy();setStatus('已生成新文案')};$('reset').onclick=()=>location.reload();$('screenshot').onchange=e=>{const f=e.target.files[0];if(!f)return;s.screenshotName=f.name;const im=new Image();im.onload=()=>{s.screenshot=im;draw()};im.src=URL.createObjectURL(f)};
-(async()=>{try{s.employees=await api('employees');s.employee=s.employees[0]}catch(e){setStatus(e.message)}sync();render();draw();loadHistory()})();
-</script></body></html>
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>销售战报中心 · 战报生成器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #dfe2e7;
+      --panel: #f7f8fa;
+      --ink: #15171b;
+      --muted: #646b77;
+      --line: #d5d9df;
+      --red: #ad1117;
+      --red-deep: #7d0b10;
+      --gold: #d5ac58;
+      --focus: #1677ff;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid rgba(22, 119, 255, 0.28);
+      outline-offset: 2px;
+    }
+
+    .topbar {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 0 24px;
+      border-bottom: 1px solid #292d34;
+      background: #111318;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin-right: 11px;
+      border-radius: 7px;
+      border: 1px solid #d2a64f;
+      background: #a90f15;
+      color: #fff7df;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .brand-mark img {
+      display: block;
+      width: 28px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-copy strong {
+      display: block;
+      color: #f5f6f8;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .brand-copy span {
+      display: block;
+      margin-top: 3px;
+      color: #9ea5b1;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: minmax(320px, 376px) minmax(0, 1fr);
+      height: calc(100vh - 64px);
+      min-height: 680px;
+    }
+
+    .control-panel {
+      overflow-y: auto;
+      padding: 22px 20px 28px;
+      border-right: 1px solid #cdd1d8;
+      background: var(--panel);
+    }
+
+    .panel-title {
+      margin: 0 0 5px;
+      font-size: 20px;
+      line-height: 1.4;
+    }
+
+    .panel-subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .field-group {
+      margin: 0 0 22px;
+      padding: 0 0 22px;
+      border: 0;
+      border-bottom: 1px solid #e0e3e8;
+    }
+
+    .field-label,
+    .field-group legend {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #343943;
+    }
+
+    .employee-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .employee-option {
+      position: relative;
+      min-width: 0;
+      padding: 4px 4px 7px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #30343b;
+      text-align: center;
+      transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+    }
+
+    .employee-option:hover {
+      border-color: #bdc3cc;
+      transform: translateY(-1px);
+    }
+
+    .employee-option.is-active {
+      border-color: var(--red);
+      box-shadow: 0 0 0 2px rgba(173, 17, 23, 0.12), 0 8px 18px rgba(23, 27, 34, 0.08);
+      color: var(--red-deep);
+    }
+
+    .employee-option img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      margin-bottom: 6px;
+      border-radius: 5px;
+      object-fit: cover;
+      object-position: center 24%;
+      background: #e9ebee;
+    }
+
+    .employee-option span {
+      display: block;
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+    }
+
+    .input-shell {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      align-items: center;
+      min-height: 48px;
+      border: 1px solid #cfd4db;
+      border-radius: var(--radius);
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .input-prefix {
+      display: grid;
+      place-items: center;
+      align-self: stretch;
+      border-right: 1px solid var(--line);
+      background: #f6f7f9;
+      color: #4d545f;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .input-shell input {
+      width: 100%;
+      min-width: 0;
+      height: 46px;
+      padding: 0 13px;
+      border: 0;
+      outline: 0;
+      color: #17191d;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .currency-amount {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .currency-segment {
+      grid-template-columns: repeat(2, 1fr);
+      align-self: stretch;
+    }
+
+    .amount-only {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .date-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 12px;
+      border: 1px solid #cfd4db;
+      border-radius: var(--radius);
+      background: #fff;
+      color: #20242b;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .segment {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #e9ecf0;
+    }
+
+    .segment button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: #5d6470;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .segment button.is-active {
+      background: #fff;
+      color: var(--red-deep);
+      box-shadow: 0 1px 4px rgba(19, 25, 34, 0.12);
+    }
+
+    .segment-three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .theme-option {
+      min-width: 0;
+      min-height: 84px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #4e5560;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .theme-option.is-active {
+      border-color: var(--red);
+      color: var(--red-deep);
+      box-shadow: 0 0 0 2px rgba(173, 17, 23, 0.1);
+    }
+
+    .theme-preview {
+      display: block;
+      width: 100%;
+      aspect-ratio: 2.2 / 1;
+      margin: 0 0 6px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 4px;
+      background-position: center;
+      background-size: cover;
+      box-shadow: 0 0 0 1px rgba(26, 29, 34, 0.18);
+    }
+
+    .theme-name {
+      display: block;
+      overflow: hidden;
+      padding: 0 2px 1px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .upload-zone {
+      position: relative;
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 11px;
+      min-height: 76px;
+      padding: 12px;
+      border: 1px dashed #b9c0ca;
+      border-radius: var(--radius);
+      background: #ffffff;
+      transition: border-color 140ms ease, background 140ms ease;
+      cursor: pointer;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.is-dragging {
+      border-color: var(--red);
+      background: #fff9f7;
+    }
+
+    .upload-zone.has-file {
+      border-style: solid;
+      border-color: #b9cdbd;
+      background: #f8fcf8;
+    }
+
+    .upload-zone input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 7px;
+      background: #eceff3;
+      color: #424852;
+      font-size: 22px;
+      font-weight: 400;
+    }
+
+    .upload-copy {
+      min-width: 0;
+    }
+
+    .upload-copy strong,
+    .upload-copy span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .upload-copy strong {
+      color: #30343b;
+      font-size: 13px;
+    }
+
+    .upload-copy span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .upload-action {
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 9px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #ad1117;
+      color: #fff;
+      box-shadow: 0 5px 12px rgba(139, 23, 18, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: #9f1914;
+    }
+
+    .btn-secondary {
+      border-color: #cfd4da;
+      background: #fff;
+      color: #30343b;
+    }
+
+    .btn-ghost {
+      border-color: transparent;
+      background: transparent;
+      color: #5f6671;
+    }
+
+    .top-actions .btn-ghost {
+      color: #d8dce3;
+    }
+
+    .top-actions .btn-secondary {
+      border-color: #3a3f48;
+      background: #202329;
+      color: #f0f2f5;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      box-shadow: none;
+    }
+
+    .btn-icon {
+      width: 16px;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .preview-panel {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: #15171b;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 48px;
+      padding: 7px 16px;
+      border-bottom: 1px solid #30343b;
+      color: #edf0f4;
+      background: #101216;
+    }
+
+    .preview-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #50b86b;
+      box-shadow: 0 0 0 3px rgba(80, 184, 107, 0.15);
+    }
+
+    .preview-meta {
+      color: #969eaa;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .canvas-stage {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: auto;
+      padding: 22px;
+    }
+
+    .canvas-wrap {
+      width: min(100%, calc((100vh - 156px) * 0.9124));
+      min-width: 280px;
+      aspect-ratio: 1198 / 1313;
+      border: 1px solid rgba(222, 178, 83, 0.58);
+      background: #260306;
+      box-shadow: 0 24px 56px rgba(0, 0, 0, 0.46), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 10;
+      max-width: calc(100vw - 32px);
+      padding: 10px 14px;
+      border-radius: 7px;
+      background: #17191d;
+      color: #fff;
+      font-size: 13px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 12px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        height: 58px;
+        padding: 0 14px;
+      }
+
+      .brand-copy span,
+      .top-actions .btn-secondary {
+        display: none;
+      }
+
+      .app-shell {
+        display: flex;
+        height: auto;
+        min-height: 0;
+        flex-direction: column;
+      }
+
+      .control-panel {
+        overflow: visible;
+        padding: 18px 14px 22px;
+        border-right: 0;
+        border-bottom: 1px solid #d9dde3;
+      }
+
+      .employee-grid {
+        gap: 7px;
+      }
+
+      .preview-panel {
+        min-height: 720px;
+      }
+
+      .canvas-stage {
+        align-items: start;
+        padding: 14px;
+      }
+
+      .canvas-wrap {
+        width: min(100%, 590px);
+      }
+    }
+
+    @media (max-width: 470px) {
+      .top-actions #resetButton {
+        display: none;
+      }
+
+      .panel-title {
+        font-size: 18px;
+      }
+
+      .preview-panel {
+        min-height: 610px;
+      }
+
+      .preview-meta {
+        display: none;
+      }
+
+      .canvas-stage {
+        padding: 10px;
+      }
+    }
+
+    /* Apple-inspired light blue glass workspace */
+    :root {
+      --bg: #eaf4fb;
+      --panel: rgba(250, 253, 255, 0.72);
+      --ink: #14243a;
+      --muted: #64758a;
+      --line: rgba(115, 157, 190, 0.26);
+      --red: #0a84ff;
+      --red-deep: #075fb8;
+      --focus: #0a84ff;
+      --radius: 14px;
+      --glass: rgba(250, 253, 255, 0.7);
+      --glass-strong: rgba(255, 255, 255, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.82);
+      --soft-blue: rgba(221, 240, 252, 0.78);
+      --shadow: 0 24px 60px rgba(58, 104, 139, 0.16), 0 2px 10px rgba(45, 88, 121, 0.07);
+    }
+
+    html,
+    body {
+      height: 100%;
+      background:
+        linear-gradient(145deg, rgba(205, 234, 250, 0.96) 0%, rgba(244, 249, 253, 0.98) 48%, rgba(216, 239, 250, 0.96) 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    button,
+    input {
+      letter-spacing: 0;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid rgba(10, 132, 255, 0.24);
+      outline-offset: 2px;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 10;
+      height: 76px;
+      padding: 0 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.88);
+      background: rgba(245, 251, 255, 0.68);
+      box-shadow: 0 10px 34px rgba(67, 112, 146, 0.1);
+      -webkit-backdrop-filter: blur(28px) saturate(150%);
+      backdrop-filter: blur(28px) saturate(150%);
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      margin-right: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.96);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 20px;
+      box-shadow: 0 9px 24px rgba(45, 91, 124, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    }
+
+    .brand-mark img {
+      width: 31px;
+      height: 24px;
+    }
+
+    .brand-copy strong {
+      color: #14243a;
+      font-size: 17px;
+      font-weight: 780;
+    }
+
+    .brand-copy span {
+      margin-top: 4px;
+      color: #6c8197;
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+    }
+
+    .top-actions {
+      gap: 9px;
+    }
+
+    .app-shell {
+      grid-template-columns: minmax(350px, 398px) minmax(0, 1fr);
+      gap: 16px;
+      height: calc(100dvh - 76px);
+      min-height: 0;
+      padding: 16px;
+    }
+
+    .control-panel,
+    .preview-panel {
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      background: var(--glass);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      -webkit-backdrop-filter: blur(28px) saturate(145%);
+      backdrop-filter: blur(28px) saturate(145%);
+    }
+
+    .control-panel {
+      padding: 25px 22px 30px;
+      border-right: 1px solid var(--glass-border);
+      scrollbar-color: rgba(91, 139, 176, 0.36) transparent;
+      scrollbar-width: thin;
+    }
+
+    .control-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .control-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .control-panel::-webkit-scrollbar-thumb {
+      border: 2px solid transparent;
+      border-radius: 99px;
+      background: rgba(91, 139, 176, 0.34);
+      background-clip: padding-box;
+    }
+
+    .panel-title {
+      margin-bottom: 6px;
+      color: #10243e;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .panel-subtitle {
+      margin-bottom: 25px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .field-group {
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid rgba(111, 151, 182, 0.17);
+    }
+
+    .field-label,
+    .field-group legend {
+      margin-bottom: 11px;
+      color: #30465e;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .employee-grid {
+      gap: 9px;
+    }
+
+    .employee-option {
+      padding: 5px 5px 9px;
+      border: 1px solid rgba(129, 166, 194, 0.25);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.62);
+      color: #40556b;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease;
+    }
+
+    .employee-option:hover {
+      border-color: rgba(10, 132, 255, 0.38);
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: 0 9px 22px rgba(69, 118, 155, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .employee-option.is-active {
+      border-color: rgba(10, 132, 255, 0.78);
+      background: rgba(232, 246, 255, 0.94);
+      color: #0565c4;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.12), 0 12px 26px rgba(10, 105, 194, 0.16), inset 0 1px 0 #fff;
+    }
+
+    .employee-option img {
+      margin-bottom: 7px;
+      border-radius: 11px;
+      background: #e7f0f6;
+      box-shadow: 0 5px 14px rgba(47, 78, 105, 0.1);
+    }
+
+    .employee-option span {
+      color: inherit;
+      font-weight: 760;
+    }
+
+    .input-shell,
+    .date-input {
+      border: 1px solid rgba(121, 161, 191, 0.3);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 7px 18px rgba(72, 112, 143, 0.07);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .input-shell:focus-within,
+    .date-input:focus {
+      border-color: rgba(10, 132, 255, 0.68);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.11), 0 9px 24px rgba(41, 111, 169, 0.1);
+    }
+
+    .input-prefix {
+      border-right: 1px solid rgba(121, 161, 191, 0.22);
+      background: rgba(224, 240, 250, 0.72);
+      color: #40647f;
+    }
+
+    .input-shell input {
+      background: transparent;
+      color: #14243a;
+    }
+
+    .date-input {
+      color: #263b52;
+    }
+
+    .rmb-conversion {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      margin-top: 9px;
+      padding: 11px 12px 23px;
+      border: 1px solid rgba(10, 132, 255, 0.16);
+      border-radius: 14px;
+      background: rgba(228, 244, 254, 0.68);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .rmb-conversion div {
+      min-width: 0;
+    }
+
+    .rmb-conversion span,
+    .rmb-conversion strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rmb-conversion span {
+      margin-bottom: 3px;
+      color: #698098;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .rmb-conversion strong {
+      color: #0768c7;
+      font-size: 15px;
+      font-weight: 820;
+    }
+
+    .rmb-conversion small {
+      position: absolute;
+      right: 12px;
+      bottom: 6px;
+      color: #72889d;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .segment {
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(121, 161, 191, 0.22);
+      border-radius: 14px;
+      background: rgba(205, 226, 239, 0.5);
+      box-shadow: inset 0 1px 2px rgba(84, 126, 158, 0.06);
+    }
+
+    .segment button {
+      border-radius: 10px;
+      color: #62758a;
+      font-weight: 750;
+      transition: color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+    }
+
+    .segment button:hover {
+      color: #216da9;
+    }
+
+    .segment button.is-active {
+      background: rgba(255, 255, 255, 0.94);
+      color: #0767c7;
+      box-shadow: 0 5px 15px rgba(60, 108, 146, 0.13), inset 0 1px 0 #fff;
+    }
+
+    .theme-grid {
+      gap: 10px;
+    }
+
+    .theme-option {
+      min-height: 91px;
+      padding: 6px 6px 8px;
+      border: 1px solid rgba(124, 163, 191, 0.26);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.62);
+      color: #53677b;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+      transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .theme-option:hover {
+      border-color: rgba(10, 132, 255, 0.36);
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: 0 9px 22px rgba(69, 118, 155, 0.11);
+      transform: translateY(-1px);
+    }
+
+    .theme-option.is-active {
+      border-color: rgba(10, 132, 255, 0.8);
+      background: rgba(235, 247, 255, 0.95);
+      color: #0866c3;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1), 0 10px 23px rgba(27, 108, 177, 0.14);
+    }
+
+    .theme-preview {
+      margin-bottom: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      border-radius: 11px;
+      background-color: rgba(221, 239, 249, 0.72);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      box-shadow: 0 5px 13px rgba(40, 67, 89, 0.14), 0 0 0 1px rgba(42, 86, 119, 0.1);
+    }
+
+    .theme-name {
+      padding: 1px 4px 0;
+      font-weight: 750;
+    }
+
+    .upload-zone {
+      min-height: 82px;
+      padding: 13px;
+      border: 1px dashed rgba(47, 137, 204, 0.5);
+      border-radius: 18px;
+      background: rgba(241, 249, 254, 0.72);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+      transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.is-dragging {
+      border-color: #0a84ff;
+      background: rgba(230, 245, 255, 0.94);
+      box-shadow: 0 10px 24px rgba(30, 112, 180, 0.12), inset 0 1px 0 #fff;
+      transform: translateY(-1px);
+    }
+
+    .upload-zone.has-file {
+      border-style: solid;
+      border-color: rgba(44, 154, 121, 0.54);
+      background: rgba(237, 251, 247, 0.88);
+    }
+
+    .upload-icon {
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(207, 234, 250, 0.9));
+      color: #0876df;
+      box-shadow: 0 7px 18px rgba(55, 114, 159, 0.13);
+    }
+
+    .upload-copy strong {
+      color: #284259;
+      font-weight: 760;
+    }
+
+    .upload-copy span {
+      color: #718397;
+    }
+
+    .upload-action {
+      color: #0872d5;
+    }
+
+    .action-stack {
+      gap: 10px;
+      padding-bottom: 2px;
+    }
+
+    .copy-generator {
+      margin-top: 28px;
+      padding-top: 26px;
+      border-top: 1px solid rgba(111, 151, 182, 0.2);
+    }
+
+    .copy-generator-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .copy-generator-kicker {
+      display: block;
+      margin-bottom: 4px;
+      color: #0873d8;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .copy-generator h2 {
+      margin: 0;
+      color: #132a43;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .copy-generator-badge {
+      flex: 0 0 auto;
+      padding: 6px 9px;
+      border: 1px solid rgba(10, 132, 255, 0.18);
+      border-radius: 10px;
+      background: rgba(226, 243, 254, 0.8);
+      color: #397198;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .copy-output {
+      display: block;
+      width: 100%;
+      min-height: 342px;
+      padding: 16px;
+      resize: vertical;
+      border: 1px solid rgba(115, 157, 190, 0.28);
+      border-radius: 17px;
+      outline: 0;
+      background: rgba(255, 255, 255, 0.7);
+      color: #203a52;
+      font: 650 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 9px 24px rgba(54, 104, 142, 0.08);
+      scrollbar-color: rgba(91, 139, 176, 0.34) transparent;
+    }
+
+    .copy-output:focus {
+      border-color: rgba(10, 132, 255, 0.52);
+      box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.09), 0 9px 24px rgba(54, 104, 142, 0.1);
+    }
+
+    .copy-action-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 14px;
+      font-weight: 760;
+      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      border-color: rgba(255, 255, 255, 0.42);
+      background: linear-gradient(180deg, #2d9cff 0%, #0a7deb 50%, #0569d0 100%);
+      color: #fff;
+      box-shadow: 0 11px 25px rgba(7, 112, 216, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.38);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #43a8ff 0%, #1688f4 52%, #0870d9 100%);
+      box-shadow: 0 14px 30px rgba(7, 112, 216, 0.31), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    }
+
+    .btn-secondary,
+    .top-actions .btn-secondary {
+      border-color: rgba(121, 161, 191, 0.27);
+      background: rgba(255, 255, 255, 0.69);
+      color: #38536c;
+      box-shadow: 0 7px 18px rgba(71, 111, 142, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.94);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+    }
+
+    .btn-secondary:hover,
+    .top-actions .btn-secondary:hover {
+      border-color: rgba(10, 132, 255, 0.34);
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .btn-ghost,
+    .top-actions .btn-ghost {
+      color: #567087;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .preview-panel {
+      overflow: hidden;
+      background: rgba(246, 251, 255, 0.58);
+    }
+
+    .preview-toolbar {
+      min-height: 54px;
+      padding: 9px 17px;
+      border-bottom: 1px solid rgba(115, 157, 190, 0.19);
+      background: rgba(255, 255, 255, 0.6);
+      color: #304a62;
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      backdrop-filter: blur(20px) saturate(140%);
+    }
+
+    .preview-label {
+      font-weight: 760;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #32c77f;
+      box-shadow: 0 0 0 4px rgba(50, 199, 127, 0.13), 0 0 16px rgba(50, 199, 127, 0.42);
+    }
+
+    .preview-meta {
+      color: #71859a;
+      font-weight: 650;
+    }
+
+    .canvas-stage {
+      padding: 24px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.2)),
+        repeating-linear-gradient(90deg, rgba(93, 148, 188, 0.045) 0, rgba(93, 148, 188, 0.045) 1px, transparent 1px, transparent 34px),
+        repeating-linear-gradient(0deg, rgba(93, 148, 188, 0.045) 0, rgba(93, 148, 188, 0.045) 1px, transparent 1px, transparent 34px);
+    }
+
+    .canvas-wrap {
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      border-radius: 12px;
+      box-shadow: 0 28px 70px rgba(40, 77, 107, 0.23), 0 6px 20px rgba(48, 88, 119, 0.12), 0 0 0 1px rgba(73, 119, 153, 0.12);
+    }
+
+    .toast {
+      bottom: 26px;
+      padding: 11px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      background: rgba(28, 52, 76, 0.9);
+      box-shadow: 0 16px 36px rgba(29, 65, 94, 0.24);
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .topbar {
+        position: sticky;
+        height: 66px;
+        padding: 0 12px;
+      }
+
+      .brand-mark {
+        width: 39px;
+        height: 39px;
+        border-radius: 13px;
+      }
+
+      .app-shell {
+        gap: 12px;
+        height: auto;
+        padding: 12px;
+      }
+
+      .control-panel {
+        padding: 21px 16px 24px;
+        border: 1px solid var(--glass-border);
+        border-radius: 21px;
+      }
+
+      .preview-panel {
+        min-height: 720px;
+        border-radius: 21px;
+      }
+
+      .canvas-stage {
+        padding: 14px;
+      }
+    }
+
+    @media (max-width: 470px) {
+      .topbar {
+        height: 62px;
+      }
+
+      .brand {
+        flex: 1 1 auto;
+        overflow: hidden;
+      }
+
+      .brand-copy {
+        overflow: hidden;
+      }
+
+      .brand-copy strong {
+        font-size: 15px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .top-actions {
+        gap: 6px;
+      }
+
+      .top-actions .btn {
+        width: 40px;
+        min-width: 40px;
+        padding: 0;
+        font-size: 0;
+      }
+
+      .top-actions .btn-icon {
+        width: auto;
+        font-size: 17px;
+      }
+
+      .app-shell {
+        padding: 9px;
+      }
+
+      .control-panel {
+        padding: 19px 13px 22px;
+        border-radius: 18px;
+      }
+
+      .employee-grid {
+        gap: 6px;
+      }
+
+      .employee-option {
+        border-radius: 12px;
+      }
+
+      .employee-option img {
+        border-radius: 9px;
+      }
+
+      .currency-amount {
+        grid-template-columns: 105px minmax(0, 1fr);
+      }
+
+      .theme-grid {
+        gap: 8px;
+      }
+
+      .theme-option {
+        border-radius: 14px;
+      }
+
+      .preview-panel {
+        min-height: 610px;
+        border-radius: 18px;
+      }
+
+      .preview-toolbar {
+        min-height: 50px;
+      }
+
+      .canvas-stage {
+        padding: 10px;
+      }
+
+      .canvas-wrap {
+        border-radius: 8px;
+      }
+
+      .copy-generator-heading {
+        align-items: flex-start;
+      }
+
+      .copy-generator-badge {
+        max-width: 122px;
+        white-space: normal;
+        text-align: right;
+      }
+
+      .copy-action-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <img src="assets/brand-logo.png" alt="" draggable="false">
+      </div>
+      <div class="brand-copy">
+        <strong>销售战报中心 · 战报生成器</strong>
+        <span>Sales Victory Studio</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-ghost" href="admin.html" title="进入后台管理">
+        <span class="btn-icon" aria-hidden="true">⚙</span>
+        后台管理
+      </a>
+      <button class="btn btn-ghost" id="resetButton" type="button" title="重置当前内容">
+        <span class="btn-icon" aria-hidden="true">↺</span>
+        重置
+      </button>
+      <button class="btn btn-secondary" id="copyButton" type="button" title="复制战报图片">
+        <span class="btn-icon" aria-hidden="true">⧉</span>
+        复制图片
+      </button>
+      <button class="btn btn-secondary" id="saveTopButton" type="button" title="保存战报到后台">
+        <span class="btn-icon" aria-hidden="true">✓</span>
+        保存战报
+      </button>
+      <button class="btn btn-primary" id="downloadTopButton" type="button" title="下载 PNG 战报">
+        <span class="btn-icon" aria-hidden="true">↓</span>
+        下载 PNG
+      </button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="control-panel">
+      <h1 class="panel-title">生成开单战报</h1>
+      <p class="panel-subtitle">选择出单英雄并填写开单信息，右侧会实时生成可分享的高清战报。</p>
+
+      <fieldset class="field-group">
+        <legend>出单英雄</legend>
+        <div class="employee-grid" id="employeeGrid">
+          <button class="employee-option is-active" type="button" data-employee="sample" aria-pressed="true">
+            <img src="assets/placeholder-avatar.png" alt="示例员工">
+            <span>示例员工</span>
+          </button>
+        </div>
+      </fieldset>
+
+      <div class="field-group">
+        <label class="field-label" for="amountInput">开单金额</label>
+        <div class="currency-amount">
+          <div class="segment currency-segment" id="currencySegment">
+            <button class="is-active" type="button" data-currency="USD" aria-pressed="true">USD</button>
+            <button type="button" data-currency="RMB" aria-pressed="false">RMB</button>
+          </div>
+          <div class="input-shell amount-only">
+            <input id="amountInput" type="text" inputmode="decimal" value="100.00" maxlength="16" autocomplete="off" aria-label="开单金额">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="cumulativeInput">累积金额</label>
+        <div class="currency-amount">
+          <div class="segment currency-segment" id="cumulativeCurrencySegment">
+            <button class="is-active" type="button" data-currency="USD" aria-pressed="true">USD</button>
+            <button type="button" data-currency="RMB" aria-pressed="false">RMB</button>
+          </div>
+          <div class="input-shell amount-only">
+            <input id="cumulativeInput" type="text" inputmode="decimal" value="100.00" maxlength="16" autocomplete="off" aria-label="累积金额">
+          </div>
+        </div>
+        <div class="rmb-conversion" id="rmbConversion" aria-live="polite">
+          <div>
+            <span>本次人民币</span>
+            <strong id="convertedAmount">¥670.00</strong>
+          </div>
+          <div>
+            <span>累积人民币</span>
+            <strong id="convertedCumulative">¥670.00</strong>
+          </div>
+          <small id="conversionFormula">USD × 6.7</small>
+        </div>
+      </div>
+
+      <fieldset class="field-group">
+        <legend>客户类型</legend>
+        <div class="segment" id="customerSegment">
+          <button class="is-active" type="button" data-customer="新客户" aria-pressed="true">新客户</button>
+          <button type="button" data-customer="老客户" aria-pressed="false">老客户</button>
+        </div>
+      </fieldset>
+
+      <div class="field-group">
+        <label class="field-label" for="dateInput">战报日期</label>
+        <input class="date-input" id="dateInput" type="date">
+      </div>
+
+      <fieldset class="field-group">
+        <legend>画布比例</legend>
+        <div class="segment segment-three" id="ratioSegment">
+          <button type="button" data-ratio="portrait" aria-pressed="false">竖版</button>
+          <button type="button" data-ratio="square" aria-pressed="false">方形</button>
+          <button class="is-active" type="button" data-ratio="landscape" aria-pressed="true">横版</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>战报模板</legend>
+        <div class="theme-grid" id="themeGrid">
+          <button class="theme-option is-active" type="button" data-theme="emeraldLaurel" aria-pressed="true">
+            <span class="theme-preview" data-preview-theme="emeraldLaurel"></span>
+            <span class="theme-name">翡翠荣耀</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="techBlue" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="techBlue"></span>
+            <span class="theme-name">科技蓝光</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="luxuryBlack" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="luxuryBlack"></span>
+            <span class="theme-name">鎏金荣耀</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="flameRed" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="flameRed"></span>
+            <span class="theme-name">烈焰战魂</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="auroraMint" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="auroraMint"></span>
+            <span class="theme-name">极光星海</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="nebulaViolet" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="nebulaViolet"></span>
+            <span class="theme-name">紫曜银河</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="glacierSilver" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="glacierSilver"></span>
+            <span class="theme-name">冰川银辉</span>
+          </button>
+          <button class="theme-option" type="button" data-theme="roseObsidian" aria-pressed="false">
+            <span class="theme-preview" data-preview-theme="roseObsidian"></span>
+            <span class="theme-name">玫瑰曜石</span>
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>截图适配</legend>
+        <div class="segment" id="fitSegment">
+          <button class="is-active" type="button" data-fit="cover" aria-pressed="true">智能铺满</button>
+          <button type="button" data-fit="contain" aria-pressed="false">完整显示</button>
+        </div>
+      </fieldset>
+
+      <div class="field-group">
+        <label class="field-label" for="screenshotInput">开单截图</label>
+        <label class="upload-zone" id="uploadZone">
+          <input id="screenshotInput" type="file" accept="image/png,image/jpeg,image/webp">
+          <span class="upload-icon" aria-hidden="true">＋</span>
+          <span class="upload-copy">
+            <strong id="uploadTitle">上传订单截图</strong>
+            <span id="uploadHint">支持 PNG、JPG、WebP</span>
+          </span>
+          <span class="upload-action">选择文件</span>
+        </label>
+      </div>
+
+      <div class="action-stack">
+        <button class="btn btn-primary" id="downloadButton" type="button">
+          <span class="btn-icon" aria-hidden="true">↓</span>
+          生成并下载战报
+        </button>
+        <button class="btn btn-secondary" id="saveButton" type="button">
+          <span class="btn-icon" aria-hidden="true">✓</span>
+          保存战报到后台
+        </button>
+        <button class="btn btn-secondary" id="copyMobileButton" type="button">
+          <span class="btn-icon" aria-hidden="true">⧉</span>
+          复制战报图片
+        </button>
+      </div>
+
+      <section class="copy-generator" aria-labelledby="copyGeneratorTitle">
+        <div class="copy-generator-heading">
+          <div>
+            <span class="copy-generator-kicker">燃系播报</span>
+            <h2 id="copyGeneratorTitle">开单文案生成</h2>
+          </div>
+          <span class="copy-generator-badge">AI大赢家</span>
+        </div>
+        <textarea class="copy-output" id="copyOutput" rows="16" readonly aria-label="开单文案"></textarea>
+        <div class="copy-action-grid">
+          <button class="btn btn-primary" id="generateCopyButton" type="button">
+            <span class="btn-icon" aria-hidden="true">↻</span>
+            生成新文案
+          </button>
+          <button class="btn btn-secondary" id="copyTextButton" type="button">
+            <span class="btn-icon" aria-hidden="true">⧉</span>
+            复制文案
+          </button>
+        </div>
+      </section>
+    </aside>
+
+    <section class="preview-panel" aria-label="战报预览">
+      <div class="preview-toolbar">
+        <div class="preview-label">
+          <span class="status-dot" aria-hidden="true"></span>
+          实时预览
+        </div>
+        <div class="preview-meta" id="previewMeta">横版画布 · 1600 × 900 px</div>
+      </div>
+      <div class="canvas-stage">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="reportCanvas" width="1600" height="900" aria-label="销售战报中心开单战报预览"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/embedded-images.js"></script>
+  <script>
+    const embeddedImages = window.REPORT_IMAGE_DATA || {};
+    const BRAND_LOGO_SRC = "assets/brand-logo.png";
+    const fallbackEmployees = {
+      sample: { name: "示例员工", src: embeddedImages.sample || "assets/placeholder-avatar.png", positionY: 0.2 }
+    };
+    let employees = { ...fallbackEmployees };
+
+    const themes = {
+      blackGold: {
+        name: "黑金",
+        style: "classic",
+        background: ["#342b1a", "#544320", "#8b6b2a"],
+        plane: "#9b782f",
+        panel: "#59451f",
+        panelAlt: "#7b5d25",
+        accent: "#efc76b",
+        accentLight: "#fff4bf",
+        text: "#fff9e7",
+        muted: "#ead7ad"
+      },
+      redGold: {
+        name: "赤金",
+        style: "classic",
+        background: ["#190205", "#72070c", "#a60b10"],
+        plane: "#5d0a0f",
+        panel: "#3a0c11",
+        panelAlt: "#67111a",
+        accent: "#dbad50",
+        accentLight: "#fff0aa",
+        text: "#fff1d2",
+        muted: "#e0c5a4"
+      },
+      navySilver: {
+        name: "深海",
+        style: "classic",
+        background: ["#030b12", "#0b2638", "#17425c"],
+        plane: "#1f4b65",
+        panel: "#0d2a3c",
+        panelAlt: "#194662",
+        accent: "#b8d3df",
+        accentLight: "#eefaff",
+        text: "#edf8fc",
+        muted: "#b7cbd4"
+      },
+      emeraldGold: {
+        name: "墨绿",
+        style: "classic",
+        background: ["#03100c", "#0b2c21", "#15513c"],
+        plane: "#1c5d48",
+        panel: "#103326",
+        panelAlt: "#1b5b43",
+        accent: "#d2b162",
+        accentLight: "#fff0bb",
+        text: "#f5f3dd",
+        muted: "#c8cfb8"
+      },
+      emeraldLaurel: {
+        name: "翡翠荣耀",
+        style: "laurel",
+        nativeTemplate: true,
+        background: ["#012b16", "#075d34", "#119157"],
+        plane: "#16804b",
+        panel: "#0b5632",
+        panelAlt: "#17814b",
+        accent: "#f2cf70",
+        accentLight: "#fff6c8",
+        text: "#fffaf0",
+        muted: "#d9ecd9"
+      },
+      techBlue: {
+        name: "科技蓝光",
+        style: "tech",
+        nativeTemplate: true,
+        background: ["#020f3f", "#063aa6", "#0781e9"],
+        plane: "#096ddc",
+        panel: "#07398d",
+        panelAlt: "#0a62c5",
+        accent: "#5de1ff",
+        accentLight: "#f1fbff",
+        text: "#f3fbff",
+        muted: "#bedfff"
+      },
+      luxuryBlack: {
+        name: "鎏金荣耀",
+        style: "luxury",
+        nativeTemplate: true,
+        background: ["#030303", "#18130b", "#694816"],
+        plane: "#483315",
+        panel: "#302515",
+        panelAlt: "#674b1d",
+        accent: "#f2c45f",
+        accentLight: "#fff4bd",
+        text: "#fff8e4",
+        muted: "#dfcca5"
+      },
+      flameRed: {
+        name: "烈焰战魂",
+        style: "flame",
+        nativeTemplate: true,
+        background: ["#4a0000", "#ad0705", "#ff300b"],
+        plane: "#9c0906",
+        panel: "#790906",
+        panelAlt: "#c51a0b",
+        accent: "#ffd36d",
+        accentLight: "#fff2b9",
+        text: "#fff7e4",
+        muted: "#ffd4a0"
+      },
+      auroraMint: {
+        name: "极光星海",
+        style: "aurora",
+        nativeTemplate: true,
+        background: ["#041728", "#075467", "#102d61"],
+        plane: "#0c6c70",
+        panel: "#0d3047",
+        panelAlt: "#135d6f",
+        accent: "#6ce7c7",
+        accentLight: "#e7fff7",
+        text: "#f5fffd",
+        muted: "#b7e7e1"
+      },
+      nebulaViolet: {
+        name: "紫曜银河",
+        style: "nebula",
+        nativeTemplate: true,
+        background: ["#120a2a", "#32115e", "#71358e"],
+        plane: "#4f2479",
+        panel: "#25143f",
+        panelAlt: "#5c2d83",
+        accent: "#f1a3ff",
+        accentLight: "#fff0ff",
+        text: "#fff8ff",
+        muted: "#e3c8ef"
+      },
+      glacierSilver: {
+        name: "冰川银辉",
+        style: "glacier",
+        nativeTemplate: true,
+        background: ["#e3f2f8", "#8dc3d8", "#466f9d"],
+        plane: "#76aeca",
+        panel: "#f6fbfd",
+        panelAlt: "#c9e3ed",
+        accent: "#1b648f",
+        accentLight: "#f3fdff",
+        text: "#10354e",
+        muted: "#4f7083"
+      },
+      roseObsidian: {
+        name: "玫瑰曜石",
+        style: "rose",
+        nativeTemplate: true,
+        background: ["#1a0c17", "#4d1938", "#9a4763"],
+        plane: "#65223f",
+        panel: "#301527",
+        panelAlt: "#74304d",
+        accent: "#f3b59f",
+        accentLight: "#fff0e8",
+        text: "#fff7f2",
+        muted: "#e8c1c6"
+      }
+    };
+
+    const ratios = {
+      portrait: { name: "竖版", width: 1080, height: 1440 },
+      square: { name: "方形", width: 1200, height: 1200 },
+      landscape: { name: "横版", width: 1600, height: 900 }
+    };
+
+    function localToday() {
+      const today = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+    }
+
+    const state = {
+      employee: "sample",
+      amount: "100.00",
+      cumulativeAmount: "100.00",
+      currency: "USD",
+      cumulativeCurrency: "USD",
+      customer: "新客户",
+      date: localToday(),
+      ratio: "landscape",
+      theme: "emeraldLaurel",
+      fit: "cover",
+      screenshot: null,
+      screenshotName: ""
+    };
+
+    const imageCache = {};
+    let brandLogo = null;
+    let reportBg = null;
+    const canvas = document.getElementById("reportCanvas");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    const amountInput = document.getElementById("amountInput");
+    const cumulativeInput = document.getElementById("cumulativeInput");
+    const employeeGrid = document.getElementById("employeeGrid");
+    const currencySegment = document.getElementById("currencySegment");
+    const cumulativeCurrencySegment = document.getElementById("cumulativeCurrencySegment");
+    const customerSegment = document.getElementById("customerSegment");
+    const dateInput = document.getElementById("dateInput");
+    const ratioSegment = document.getElementById("ratioSegment");
+    const themeGrid = document.getElementById("themeGrid");
+    const fitSegment = document.getElementById("fitSegment");
+    const screenshotInput = document.getElementById("screenshotInput");
+    const uploadZone = document.getElementById("uploadZone");
+    const uploadTitle = document.getElementById("uploadTitle");
+    const uploadHint = document.getElementById("uploadHint");
+    const toast = document.getElementById("toast");
+    const canvasWrap = document.getElementById("canvasWrap");
+    const previewMeta = document.getElementById("previewMeta");
+    const copyOutput = document.getElementById("copyOutput");
+    const generateCopyButton = document.getElementById("generateCopyButton");
+    const copyTextButton = document.getElementById("copyTextButton");
+
+    let toastTimer = null;
+    let drawQueued = false;
+    let copyVersion = Math.floor(Math.random() * 1000);
+    let cumulativeManuallyEdited = false;
+    const USD_TO_RMB = 6.7;
+
+    function showToast(message) {
+      window.clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("is-visible");
+      toastTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
+    }
+
+    function sessionAdminKey() {
+      let key = sessionStorage.getItem("svs_admin_key") || "";
+      if (!key) {
+        key = window.prompt("请输入管理员密钥（仅保存在当前浏览器会话）") || "";
+        if (key) sessionStorage.setItem("svs_admin_key", key);
+      }
+      return key;
+    }
+
+    async function api(url, options = {}) {
+      const method = String(options.method || "GET").toUpperCase();
+      const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+      if (method !== "GET" && method !== "HEAD") {
+        const key = sessionAdminKey();
+        if (key) headers["x-admin-key"] = key;
+      }
+      const response = await fetch(url, { ...options, headers });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || "后台服务请求失败");
+      return payload;
+    }
+
+    function getDefaultEmployeeId() {
+      return Object.keys(employees)[0] || "sample";
+    }
+
+    function renderEmployeeGrid() {
+      employeeGrid.replaceChildren();
+      Object.entries(employees).forEach(([id, employee]) => {
+        const button = document.createElement("button");
+        button.className = "employee-option";
+        button.type = "button";
+        button.dataset.employee = id;
+        const active = id === state.employee;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+
+        const image = document.createElement("img");
+        image.src = employee.src;
+        image.alt = employee.name;
+        image.style.objectPosition = `center ${Math.round((employee.positionY || 0.2) * 100)}%`;
+        const name = document.createElement("span");
+        name.textContent = employee.name;
+        button.append(image, name);
+        employeeGrid.append(button);
+      });
+    }
+
+    function applyEmployeeRecords(records) {
+      const nextEmployees = {};
+      records.forEach((record) => {
+        if (!record?.id || !record?.name || !record?.image) return;
+        nextEmployees[record.id] = {
+          id: record.id,
+          name: record.name,
+          src: record.image || embeddedImages[record.id],
+          positionY: Number(record.positionY) || 0.2
+        };
+      });
+      if (!Object.keys(nextEmployees).length) return false;
+      employees = nextEmployees;
+      if (!employees[state.employee]) state.employee = getDefaultEmployeeId();
+      renderEmployeeGrid();
+      return true;
+    }
+
+    async function refreshEmployees({ silent = false } = {}) {
+      try {
+        const records = await api("/api/employees");
+        if (!applyEmployeeRecords(records)) return;
+        const selectedEmployee = employees[state.employee];
+        thumbnailPortrait = await loadImage(selectedEmployee.src);
+        renderThemeThumbnails();
+        generateOrderCopy();
+        requestDraw();
+      } catch (error) {
+        if (!silent) showToast(error.message || "员工列表刷新失败");
+      }
+    }
+
+    function chooseCopyVariant(list, salt) {
+      return list[(copyVersion * (salt + 3) + salt) % list.length];
+    }
+
+    function amountToRmb(value, currency = state.currency) {
+      const numeric = Number(String(value || "0").replace(/,/g, "").replace(/[^0-9.]/g, ""));
+      const safeNumber = Number.isFinite(numeric) ? numeric : 0;
+      return safeNumber * (currency === "USD" ? USD_TO_RMB : 1);
+    }
+
+    function formatRmbAmount(value, currency = state.currency) {
+      return formatAmount(amountToRmb(value, currency));
+    }
+
+    function updateRmbConversionPreview() {
+      const convertedAmount = document.getElementById("convertedAmount");
+      const convertedCumulative = document.getElementById("convertedCumulative");
+      const conversionFormula = document.getElementById("conversionFormula");
+      if (!convertedAmount || !convertedCumulative || !conversionFormula) return;
+      convertedAmount.textContent = `¥${formatRmbAmount(state.amount)}`;
+      convertedCumulative.textContent = `¥${formatRmbAmount(state.cumulativeAmount || state.amount, state.cumulativeCurrency)}`;
+      const currentFormula = state.currency === "USD" ? `本次 USD × ${USD_TO_RMB}` : "本次 RMB 原值";
+      const cumulativeFormula = state.cumulativeCurrency === "USD" ? `累积 USD × ${USD_TO_RMB}` : "累积 RMB 原值";
+      conversionFormula.textContent = `${currentFormula} · ${cumulativeFormula}`;
+    }
+
+    function copyReportMonth() {
+      const month = Number(String(state.date || localToday()).split("-")[1]);
+      return Number.isFinite(month) && month > 0 ? month : new Date().getMonth() + 1;
+    }
+
+    function generateOrderCopy(notify = false) {
+      copyVersion += 1;
+      const employee = employees[state.employee]?.name || state.employee;
+      const amount = `RMB ${formatRmbAmount(state.amount)}`;
+      const cumulative = `RMB ${formatRmbAmount(state.cumulativeAmount || state.amount, state.cumulativeCurrency)}`;
+      const month = copyReportMonth();
+      const isNewCustomer = state.customer === "新客户";
+      const momentumLines = [
+        "乘胜追击，再下一城！",
+        "火力全开，再创佳绩！",
+        "战鼓已响，继续冲锋！",
+        "状态拉满，连战连捷！"
+      ];
+      const newCustomerLines = [
+        `热烈恭喜 ${employee} 成功拿下${month}月新客户订单，开拓战果再添一笔！🔥`,
+        `${employee} 火力出击，${month}月新客成功转化，首单喜报强势送达！🔥`,
+        `新客破冰，首单告捷！恭喜 ${employee} 再拓一席新战果！🔥`
+      ];
+      const oldCustomerLines = [
+        `热烈恭喜 ${employee} 成功拿下${month}月老客户续单，信任再加码！🔥`,
+        `${employee} 深耕客户再结硕果，${month}月老客复购稳稳拿下！🔥`,
+        `老客续单，实力见证！恭喜 ${employee} 再下一城！🔥`
+      ];
+      const growthLines = isNewCustomer
+        ? [
+            "新客户持续开发，新订单接连不断！",
+            "开疆拓土不停歇，客户版图持续扩张！",
+            "新客源源不断，增长势能持续拉满！"
+          ]
+        : [
+            "老客户持续复购，信任不断加码！",
+            "深耕客户关系，续单战果接连落袋！",
+            "服务赢得长期信任，复购热度持续攀升！"
+          ];
+      const actionLines = [
+        "保持冲锋姿态，向着更高目标全力冲刺！🚀",
+        "继续保持高燃状态，向更高战绩发起冲锋！🚀",
+        "乘势而上不松劲，向下一个目标全速推进！🚀"
+      ];
+      const endingLines = [
+        "⚔️ 剑锋所指，势不可挡！",
+        "⚔️ 目标锁定，战果必达！",
+        "⚔️ 全员并肩，战绩再攀高峰！"
+      ];
+
+      copyOutput.value = [
+        "🔥【AI大赢家】🔥",
+        `🌟 出单英雄：${employee}`,
+        `💰 本次出单：${amount}`,
+        `⚡ 累积金额：${cumulative}`,
+        `🤗 客户性质：${state.customer}`,
+        "",
+        chooseCopyVariant(momentumLines, 1),
+        isNewCustomer ? chooseCopyVariant(newCustomerLines, 2) : chooseCopyVariant(oldCustomerLines, 2),
+        chooseCopyVariant(growthLines, 3),
+        chooseCopyVariant(actionLines, 4),
+        "",
+        "我们的口号：",
+        "剑锋所指，势不可挡！",
+        "💪 AI大赢家",
+        chooseCopyVariant(endingLines, 5)
+      ].join("\n");
+
+      if (notify) showToast("已生成一版燃系文案");
+      return copyOutput.value;
+    }
+
+    async function copyOrderCopy() {
+      const text = copyOutput.value || (generateOrderCopy(), copyOutput.value);
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          copyOutput.focus();
+          copyOutput.select();
+          document.execCommand("copy");
+          copyOutput.setSelectionRange(0, 0);
+        }
+        showToast("开单文案已复制");
+      } catch {
+        showToast("复制未完成，请手动选择文案");
+      }
+    }
+
+    function roundedRectPath(context, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.arcTo(x + width, y, x + width, y + height, r);
+      context.arcTo(x + width, y + height, x, y + height, r);
+      context.arcTo(x, y + height, x, y, r);
+      context.arcTo(x, y, x + width, y, r);
+      context.closePath();
+    }
+
+    function fillRoundedRect(context, x, y, width, height, radius, fillStyle) {
+      roundedRectPath(context, x, y, width, height, radius);
+      context.fillStyle = fillStyle;
+      context.fill();
+    }
+
+    function strokeRoundedRect(context, x, y, width, height, radius, strokeStyle, lineWidth) {
+      roundedRectPath(context, x, y, width, height, radius);
+      context.strokeStyle = strokeStyle;
+      context.lineWidth = lineWidth;
+      context.stroke();
+    }
+
+    function loadImage(src) {
+      if (imageCache[src]) return imageCache[src];
+      imageCache[src] = new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+      return imageCache[src];
+    }
+
+    function coverRect(context, image, x, y, width, height, focusY = 0.5) {
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const sourceWidth = width / scale;
+      const sourceHeight = height / scale;
+      const sourceX = (image.naturalWidth - sourceWidth) / 2;
+      const sourceY = Math.max(0, Math.min(image.naturalHeight - sourceHeight, image.naturalHeight * focusY - sourceHeight * 0.45));
+      context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+    }
+
+    function calculateContainRect(image, x, y, width, height) {
+      const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+      const drawWidth = image.naturalWidth * scale;
+      const drawHeight = image.naturalHeight * scale;
+      const drawX = x + (width - drawWidth) / 2;
+      const drawY = y + (height - drawHeight) / 2;
+      return { x: drawX, y: drawY, width: drawWidth, height: drawHeight };
+    }
+
+    function containRect(context, image, x, y, width, height) {
+      const rect = calculateContainRect(image, x, y, width, height);
+      context.drawImage(image, rect.x, rect.y, rect.width, rect.height);
+      return rect;
+    }
+
+    function drawCanvasBrand(context, theme, x, y, scale = 1) {
+      const markWidth = 76 * scale;
+      const markHeight = 54 * scale;
+      const paddingX = 9 * scale;
+      const paddingY = 8 * scale;
+
+      context.save();
+      context.shadowColor = colorWithAlpha(theme.background[0], 0.34);
+      context.shadowBlur = 12 * scale;
+      fillRoundedRect(context, x, y, markWidth, markHeight, 8 * scale, "rgba(255,255,255,0.92)");
+      context.shadowColor = "transparent";
+      strokeRoundedRect(
+        context,
+        x,
+        y,
+        markWidth,
+        markHeight,
+        8 * scale,
+        colorWithAlpha(theme.accent, 0.88),
+        Math.max(1, 1.6 * scale)
+      );
+
+      if (brandLogo) {
+        containRect(
+          context,
+          brandLogo,
+          x + paddingX,
+          y + paddingY,
+          markWidth - paddingX * 2,
+          markHeight - paddingY * 2
+        );
+      }
+
+      context.restore();
+    }
+
+    function formatAmount(value) {
+      const cleaned = String(value).replace(/,/g, "").replace(/[^0-9.]/g, "");
+      const parts = cleaned.split(".");
+      const normalized = parts.shift() + (parts.length ? "." + parts.join("").slice(0, 2) : "");
+      const number = Number(normalized);
+      if (!Number.isFinite(number)) return "0.00";
+      return number.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatNow() {
+      const now = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    function drawBackground(context) {
+      const background = context.createLinearGradient(0, 0, 1198, 1313);
+      background.addColorStop(0, "#170205");
+      background.addColorStop(0.42, "#71070c");
+      background.addColorStop(0.72, "#a40b0f");
+      background.addColorStop(1, "#260205");
+      context.fillStyle = background;
+      context.fillRect(0, 0, 1198, 1313);
+
+      const leftShade = context.createLinearGradient(0, 0, 430, 0);
+      leftShade.addColorStop(0, "rgba(4, 5, 8, 0.92)");
+      leftShade.addColorStop(0.72, "rgba(14, 5, 8, 0.62)");
+      leftShade.addColorStop(1, "rgba(30, 5, 8, 0)");
+      context.fillStyle = leftShade;
+      context.fillRect(0, 0, 470, 1155);
+
+      context.save();
+      context.beginPath();
+      context.moveTo(405, 0);
+      context.lineTo(1198, 0);
+      context.lineTo(1198, 560);
+      context.lineTo(800, 660);
+      context.lineTo(420, 545);
+      context.closePath();
+      const topPlane = context.createLinearGradient(430, 30, 1130, 600);
+      topPlane.addColorStop(0, "rgba(164, 10, 16, 0.22)");
+      topPlane.addColorStop(0.55, "rgba(255, 38, 29, 0.19)");
+      topPlane.addColorStop(1, "rgba(32, 2, 6, 0.08)");
+      context.fillStyle = topPlane;
+      context.fill();
+      context.restore();
+
+      const glow = context.createRadialGradient(880, 340, 20, 880, 340, 500);
+      glow.addColorStop(0, "rgba(255, 75, 30, 0.27)");
+      glow.addColorStop(0.42, "rgba(202, 21, 18, 0.12)");
+      glow.addColorStop(1, "rgba(24, 1, 4, 0)");
+      context.fillStyle = glow;
+      context.fillRect(360, 0, 838, 760);
+
+      context.save();
+      context.globalAlpha = 0.17;
+      context.strokeStyle = "#efc66f";
+      context.lineWidth = 1;
+      for (let i = 0; i < 22; i += 1) {
+        const startY = 54 + i * 47;
+        context.beginPath();
+        context.moveTo(420, startY);
+        context.bezierCurveTo(650, startY - 38, 900, startY + 34, 1190, startY - 12);
+        context.stroke();
+      }
+      context.restore();
+
+      context.save();
+      context.globalCompositeOperation = "screen";
+      for (let i = 0; i < 13; i += 1) {
+        const y = 1065 + i * 18;
+        const streak = context.createLinearGradient(260, y, 1190, y - 125);
+        streak.addColorStop(0, "rgba(255, 216, 118, 0)");
+        streak.addColorStop(0.58, "rgba(255, 174, 56, 0.2)");
+        streak.addColorStop(1, "rgba(255, 244, 205, 0)");
+        context.strokeStyle = streak;
+        context.lineWidth = i % 4 === 0 ? 3 : 1;
+        context.beginPath();
+        context.moveTo(190 + i * 11, y + 105);
+        context.quadraticCurveTo(790, y - 8, 1198, 990 - i * 8);
+        context.stroke();
+      }
+      context.restore();
+
+      context.fillStyle = "rgba(255, 225, 151, 0.62)";
+      for (let i = 0; i < 52; i += 1) {
+        const x = (i * 197) % 1198;
+        const y = (i * 109) % 1313;
+        const size = i % 11 === 0 ? 2 : 0.8;
+        context.fillRect(x, y, size, size);
+      }
+
+      context.strokeStyle = "rgba(225, 181, 86, 0.72)";
+      context.lineWidth = 3;
+      context.strokeRect(13, 13, 1172, 1287);
+      context.strokeStyle = "rgba(255, 244, 207, 0.16)";
+      context.lineWidth = 1;
+      context.strokeRect(22, 22, 1154, 1269);
+    }
+
+    function drawBrand(context) {
+      context.save();
+      context.fillStyle = "#fff1c8";
+      context.textAlign = "center";
+      context.shadowColor = "rgba(232, 181, 75, 0.28)";
+      context.shadowBlur = 12;
+      context.font = '900 54px "Microsoft YaHei", sans-serif';
+      context.fillText("销售战报中心", 206, 92);
+      context.restore();
+    }
+
+    function drawTitle(context) {
+      context.save();
+      const gold = context.createLinearGradient(520, 70, 1010, 286);
+      gold.addColorStop(0, "#fff5c8");
+      gold.addColorStop(0.34, "#eecb78");
+      gold.addColorStop(0.7, "#d39b37");
+      gold.addColorStop(1, "#fff0aa");
+      context.fillStyle = gold;
+      context.textAlign = "center";
+      context.shadowColor = "rgba(0, 0, 0, 0.68)";
+      context.shadowBlur = 18;
+      context.shadowOffsetY = 10;
+      context.font = '900 178px "STKaiti", "KaiTi", "Microsoft YaHei", serif';
+      context.fillText("战报", 790, 258);
+      context.shadowColor = "transparent";
+      context.fillStyle = "rgba(255, 236, 186, 0.92)";
+      context.font = '600 23px Arial, sans-serif';
+      context.fillText("V I C T O R Y   R E P O R T", 790, 316);
+
+      const line = context.createLinearGradient(452, 0, 1128, 0);
+      line.addColorStop(0, "rgba(232, 188, 91, 0)");
+      line.addColorStop(0.25, "rgba(232, 188, 91, 0.8)");
+      line.addColorStop(0.75, "rgba(232, 188, 91, 0.8)");
+      line.addColorStop(1, "rgba(232, 188, 91, 0)");
+      context.fillStyle = line;
+      context.fillRect(455, 340, 670, 2);
+
+      context.fillStyle = "#f5d988";
+      context.font = '900 44px "STKaiti", "KaiTi", serif';
+      context.fillText("剑锋所指，势不可挡！", 790, 390);
+      context.restore();
+    }
+
+    function drawPortrait(context, portrait, employee) {
+      const x = 38;
+      const y = 150;
+      const width = 350;
+      const height = 490;
+
+      context.save();
+      context.shadowColor = "rgba(226, 178, 76, 0.38)";
+      context.shadowBlur = 26;
+      fillRoundedRect(context, x - 4, y - 4, width + 8, height + 8, 11, "#13080a");
+      context.shadowColor = "transparent";
+      roundedRectPath(context, x, y, width, height, 8);
+      context.clip();
+      coverRect(context, portrait, x, y, width, height, employee.positionY);
+
+      const sideTint = context.createLinearGradient(x, y, x + width, y);
+      sideTint.addColorStop(0, "rgba(10, 4, 7, 0.35)");
+      sideTint.addColorStop(0.5, "rgba(10, 4, 7, 0)");
+      sideTint.addColorStop(1, "rgba(78, 5, 9, 0.32)");
+      context.fillStyle = sideTint;
+      context.fillRect(x, y, width, height);
+
+      const bottomTint = context.createLinearGradient(x, y + 315, x, y + height);
+      bottomTint.addColorStop(0, "rgba(8, 6, 8, 0)");
+      bottomTint.addColorStop(0.66, "rgba(35, 5, 9, 0.44)");
+      bottomTint.addColorStop(1, "rgba(8, 8, 11, 0.95)");
+      context.fillStyle = bottomTint;
+      context.fillRect(x, y + 300, width, height - 300);
+      context.restore();
+      strokeRoundedRect(context, x, y, width, height, 8, "rgba(239, 202, 117, 0.88)", 3);
+      strokeRoundedRect(context, x + 8, y + 8, width - 16, height - 16, 5, "rgba(255, 246, 218, 0.14)", 1);
+
+      context.save();
+      fillRoundedRect(context, x + 18, y + height - 78, width - 36, 58, 4, "rgba(8, 9, 12, 0.84)");
+      context.fillStyle = "#dfb75f";
+      context.fillRect(x + 48, y + height - 78, width - 96, 2);
+      context.fillStyle = "#fff0c6";
+      context.font = '900 36px Arial, sans-serif';
+      context.textAlign = "center";
+      context.fillText(employee.name, x + width / 2, y + height - 37);
+      context.restore();
+    }
+
+    function drawAnnouncement(context, employeeName, customerType) {
+      context.save();
+      context.fillStyle = "#d7aa4e";
+      context.fillRect(424, 426, 4, 130);
+
+      context.textAlign = "left";
+      context.fillStyle = "rgba(255, 241, 207, 0.84)";
+      context.font = '800 28px "Microsoft YaHei", sans-serif';
+      context.fillText("热烈祝贺", 449, 452);
+
+      context.fillStyle = "#f0c45f";
+      context.font = '900 55px Arial, sans-serif';
+      context.fillText(employeeName, 448, 511);
+      const nameWidth = context.measureText(employeeName).width;
+      context.fillStyle = "#fff4dc";
+      context.font = '900 41px "Microsoft YaHei", sans-serif';
+      context.fillText("成功开单！", 463 + nameWidth, 509);
+
+      const lineLabel = customerType === "新客户" ? "新客首单，专业赢得信任" : "老客续单，服务赢得长久";
+      context.fillStyle = "#e6d0aa";
+      context.font = '700 25px "Microsoft YaHei", sans-serif';
+      context.fillText(lineLabel, 449, 551);
+
+      const accentLine = context.createLinearGradient(449, 0, 1138, 0);
+      accentLine.addColorStop(0, "rgba(221, 178, 84, 0.76)");
+      accentLine.addColorStop(1, "rgba(221, 178, 84, 0)");
+      context.fillStyle = accentLine;
+      context.fillRect(449, 578, 689, 2);
+      context.restore();
+    }
+
+    function drawAmountPanel(context, amount, customerType, timeText) {
+      const x = 38;
+      const y = 680;
+      const width = 350;
+      const height = 443;
+      const paper = context.createLinearGradient(x, y, x, y + height);
+      paper.addColorStop(0, "rgba(24, 16, 18, 0.98)");
+      paper.addColorStop(0.55, "rgba(35, 8, 12, 0.97)");
+      paper.addColorStop(1, "rgba(10, 9, 12, 0.99)");
+      fillRoundedRect(context, x, y, width, height, 10, paper);
+      strokeRoundedRect(context, x, y, width, height, 10, "rgba(231, 192, 105, 0.9)", 2);
+      strokeRoundedRect(context, x + 8, y + 8, width - 16, height - 16, 6, "rgba(255, 246, 218, 0.1)", 1);
+
+      context.save();
+      context.textAlign = "center";
+      context.fillStyle = "#fff0c7";
+      context.font = '900 36px "Microsoft YaHei", sans-serif';
+      context.fillText("星普战报", x + width / 2, y + 60);
+      context.fillStyle = "rgba(216, 177, 91, 0.78)";
+      context.font = '600 14px Arial, sans-serif';
+      context.fillText("SIGNED ORDER", x + width / 2, y + 88);
+
+      const divider = context.createLinearGradient(x + 48, 0, x + width - 48, 0);
+      divider.addColorStop(0, "rgba(220, 177, 83, 0)");
+      divider.addColorStop(0.5, "rgba(220, 177, 83, 0.82)");
+      divider.addColorStop(1, "rgba(220, 177, 83, 0)");
+      context.fillStyle = divider;
+      context.fillRect(x + 48, y + 109, width - 96, 2);
+
+      context.fillStyle = "#d7c4a3";
+      context.font = '700 21px "Microsoft YaHei", sans-serif';
+      context.fillText("成功签单金额", x + width / 2, y + 151);
+
+      const amountText = `USD ${amount}`;
+      let amountFontSize = 58;
+      context.font = `900 ${amountFontSize}px Arial, sans-serif`;
+      while (context.measureText(amountText).width > width - 30 && amountFontSize > 32) {
+        amountFontSize -= 2;
+        context.font = `900 ${amountFontSize}px Arial, sans-serif`;
+      }
+      const amountGold = context.createLinearGradient(x + 30, 0, x + width - 30, 0);
+      amountGold.addColorStop(0, "#c8902e");
+      amountGold.addColorStop(0.48, "#fff0aa");
+      amountGold.addColorStop(1, "#d5a649");
+      context.fillStyle = amountGold;
+      context.shadowColor = "rgba(226, 177, 75, 0.2)";
+      context.shadowBlur = 12;
+      context.fillText(amountText, x + width / 2, y + 225);
+      context.shadowColor = "transparent";
+
+      fillRoundedRect(context, x + 94, y + 252, width - 188, 40, 20, "rgba(167, 16, 21, 0.78)");
+      strokeRoundedRect(context, x + 94, y + 252, width - 188, 40, 20, "rgba(237, 199, 112, 0.7)", 1);
+      context.fillStyle = "#fff0c7";
+      context.font = '800 19px "Microsoft YaHei", sans-serif';
+      context.fillText(customerType, x + width / 2, y + 278);
+
+      context.fillStyle = "#f2dca8";
+      context.font = '900 30px "STKaiti", "KaiTi", serif';
+      context.fillText(customerType === "新客户" ? "开局即冲刺" : "信任再续约", x + width / 2, y + 350);
+      context.fillStyle = "#fff3d4";
+      context.fillText("我们势不可挡！", x + width / 2, y + 390);
+
+      context.fillStyle = "rgba(225, 202, 163, 0.64)";
+      context.font = '600 15px Arial, sans-serif';
+      context.fillText(timeText, x + width / 2, y + 424);
+      context.restore();
+    }
+
+    function drawScreenshotPanel(context, screenshot) {
+      const x = 406;
+      const y = 680;
+      const width = 752;
+      const height = 443;
+      fillRoundedRect(context, x, y, width, height, 9, "#08090c");
+      strokeRoundedRect(context, x, y, width, height, 9, "rgba(231, 192, 105, 0.9)", 2);
+      strokeRoundedRect(context, x + 8, y + 8, width - 16, height - 16, 6, "rgba(255, 246, 218, 0.1)", 1);
+
+      context.save();
+      const innerX = x + 12;
+      const innerY = y + 12;
+      const innerWidth = width - 24;
+      const innerHeight = height - 24;
+      fillRoundedRect(context, innerX, innerY, innerWidth, innerHeight, 5, "#090a0d");
+      roundedRectPath(context, innerX, innerY, innerWidth, innerHeight, 5);
+      context.clip();
+
+      if (screenshot) {
+        context.save();
+        context.filter = "blur(24px) brightness(0.42) saturate(1.18)";
+        coverRect(context, screenshot, innerX - 34, innerY - 34, innerWidth + 68, innerHeight + 68, 0.5);
+        context.restore();
+
+        const veil = context.createLinearGradient(innerX, innerY, innerX, innerY + innerHeight);
+        veil.addColorStop(0, "rgba(4, 5, 8, 0.32)");
+        veil.addColorStop(0.5, "rgba(4, 5, 8, 0.12)");
+        veil.addColorStop(1, "rgba(4, 5, 8, 0.38)");
+        context.fillStyle = veil;
+        context.fillRect(innerX, innerY, innerWidth, innerHeight);
+
+        const imageRect = calculateContainRect(screenshot, innerX + 18, innerY + 18, innerWidth - 36, innerHeight - 36);
+        context.save();
+        context.shadowColor = "rgba(0, 0, 0, 0.7)";
+        context.shadowBlur = 24;
+        context.shadowOffsetY = 8;
+        context.fillStyle = "rgba(0, 0, 0, 0.58)";
+        context.fillRect(imageRect.x - 4, imageRect.y - 4, imageRect.width + 8, imageRect.height + 8);
+        context.restore();
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+        context.drawImage(screenshot, imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+        context.strokeStyle = "rgba(255, 245, 216, 0.46)";
+        context.lineWidth = 1.5;
+        context.strokeRect(imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+      } else {
+        const placeholderGlow = context.createRadialGradient(
+          innerX + innerWidth / 2,
+          innerY + innerHeight / 2,
+          10,
+          innerX + innerWidth / 2,
+          innerY + innerHeight / 2,
+          230
+        );
+        placeholderGlow.addColorStop(0, "rgba(174, 20, 25, 0.28)");
+        placeholderGlow.addColorStop(1, "rgba(8, 9, 12, 0)");
+        context.fillStyle = placeholderGlow;
+        context.fillRect(innerX, innerY, innerWidth, innerHeight);
+        strokeRoundedRect(context, innerX + innerWidth / 2 - 36, innerY + innerHeight / 2 - 36, 72, 72, 6, "rgba(224, 184, 94, 0.72)", 2);
+        context.fillStyle = "#e4bd69";
+        context.font = '300 48px Arial, sans-serif';
+        context.textAlign = "center";
+        context.fillText("+", innerX + innerWidth / 2, innerY + innerHeight / 2 + 16);
+        context.fillStyle = "rgba(246, 226, 186, 0.72)";
+        context.font = '700 21px "Microsoft YaHei", sans-serif';
+        context.fillText("上传开单截图", innerX + innerWidth / 2, innerY + innerHeight / 2 + 82);
+      }
+      context.restore();
+    }
+
+    function drawFooter(context) {
+      context.save();
+      const footerBand = context.createLinearGradient(0, 1148, 0, 1313);
+      footerBand.addColorStop(0, "rgba(23, 3, 7, 0.12)");
+      footerBand.addColorStop(1, "rgba(6, 7, 10, 0.74)");
+      context.fillStyle = footerBand;
+      context.fillRect(14, 1148, 1170, 151);
+
+      const line = context.createLinearGradient(40, 0, 1158, 0);
+      line.addColorStop(0, "rgba(232, 191, 99, 0)");
+      line.addColorStop(0.18, "rgba(232, 191, 99, 0.82)");
+      line.addColorStop(0.82, "rgba(232, 191, 99, 0.82)");
+      line.addColorStop(1, "rgba(232, 191, 99, 0)");
+      context.fillStyle = line;
+      context.fillRect(40, 1158, 1118, 2);
+
+      context.fillStyle = "rgba(255, 239, 203, 0.82)";
+      context.textAlign = "center";
+      context.font = '700 25px "Microsoft YaHei", sans-serif';
+      context.fillText("每一份努力都值得被看见，每一次突破都在成就更强的我们", 599, 1208);
+      const sloganGold = context.createLinearGradient(330, 0, 870, 0);
+      sloganGold.addColorStop(0, "#cf9633");
+      sloganGold.addColorStop(0.5, "#fff0a7");
+      sloganGold.addColorStop(1, "#d3a044");
+      context.fillStyle = sloganGold;
+      context.font = '900 52px "STKaiti", "KaiTi", serif';
+      context.fillText("剑锋所指，势不可挡！", 599, 1271);
+      context.restore();
+    }
+
+    function colorWithAlpha(hex, alpha) {
+      const normalized = hex.replace("#", "");
+      const value = Number.parseInt(normalized.length === 3
+        ? normalized.split("").map((character) => character + character).join("")
+        : normalized, 16);
+      const red = (value >> 16) & 255;
+      const green = (value >> 8) & 255;
+      const blue = value & 255;
+      return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+    }
+
+    function getPremiumLayout(ratioKey) {
+      if (ratioKey === "landscape") {
+        return {
+          mode: "landscape",
+          portrait: { x: 42, y: 120, width: 320, height: 670 },
+          title: { centerX: 610, y: 214, size: 132, englishY: 260, lineY: 282, sloganY: 326 },
+          announcement: { x: 400, y: 365, width: 440 },
+          amount: { x: 400, y: 535, width: 440, height: 255 },
+          screenshot: { x: 880, y: 120, width: 680, height: 670 },
+          footerY: 808,
+          leftShadeWidth: 370
+        };
+      }
+      if (ratioKey === "square") {
+        return {
+          mode: "square",
+          portrait: { x: 38, y: 120, width: 330, height: 440 },
+          title: { centerX: 790, y: 222, size: 150, englishY: 270, lineY: 294, sloganY: 340 },
+          announcement: { x: 400, y: 375, width: 740 },
+          amount: { x: 38, y: 600, width: 330, height: 390 },
+          screenshot: { x: 388, y: 600, width: 774, height: 390 },
+          footerY: 1020,
+          leftShadeWidth: 395
+        };
+      }
+      return {
+        mode: "portrait",
+        portrait: { x: 38, y: 150, width: 350, height: 490 },
+        title: { centerX: 790, y: 258, size: 178, englishY: 316, lineY: 340, sloganY: 390 },
+        announcement: { x: 424, y: 426, width: 710 },
+        amount: { x: 38, y: 680, width: 350, height: 443 },
+        screenshot: { x: 406, y: 680, width: 752, height: 443 },
+        footerY: 1148,
+        leftShadeWidth: 430
+      };
+    }
+
+    function drawUpwardChart(context, width, height, theme, opacity = 0.28) {
+      const baseX = width * 0.73;
+      const baseY = height * 0.34;
+      const barWidth = Math.max(12, width * 0.012);
+      const gap = barWidth * 0.72;
+      context.save();
+      context.globalAlpha = opacity;
+      for (let index = 0; index < 7; index += 1) {
+        const barHeight = height * (0.045 + index * 0.021);
+        const barX = baseX + index * (barWidth + gap);
+        const barGradient = context.createLinearGradient(0, baseY - barHeight, 0, baseY);
+        barGradient.addColorStop(0, theme.accentLight);
+        barGradient.addColorStop(1, theme.accent);
+        context.fillStyle = barGradient;
+        context.fillRect(barX, baseY - barHeight, barWidth, barHeight);
+      }
+
+      context.strokeStyle = theme.accentLight;
+      context.lineWidth = Math.max(4, width * 0.004);
+      context.lineJoin = "round";
+      context.lineCap = "round";
+      context.beginPath();
+      context.moveTo(baseX - width * 0.015, baseY - height * 0.01);
+      context.lineTo(baseX + width * 0.055, baseY - height * 0.075);
+      context.lineTo(baseX + width * 0.11, baseY - height * 0.045);
+      context.lineTo(baseX + width * 0.185, baseY - height * 0.17);
+      context.stroke();
+      context.beginPath();
+      context.moveTo(baseX + width * 0.157, baseY - height * 0.164);
+      context.lineTo(baseX + width * 0.185, baseY - height * 0.17);
+      context.lineTo(baseX + width * 0.18, baseY - height * 0.135);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawLaurelWreath(context, centerX, centerY, radius, theme, opacity = 0.34) {
+      context.save();
+      context.globalAlpha = opacity;
+      context.fillStyle = theme.accentLight;
+      context.strokeStyle = theme.accent;
+      context.lineWidth = Math.max(2, radius * 0.012);
+      [-1, 1].forEach((side) => {
+        context.beginPath();
+        context.moveTo(centerX + side * radius * 0.92, centerY + radius * 0.44);
+        context.quadraticCurveTo(
+          centerX + side * radius * 1.12,
+          centerY - radius * 0.16,
+          centerX + side * radius * 0.7,
+          centerY - radius * 0.72
+        );
+        context.stroke();
+        for (let index = 0; index < 9; index += 1) {
+          const progress = index / 8;
+          const x = centerX + side * radius * (0.9 + Math.sin(progress * Math.PI) * 0.17 - progress * 0.2);
+          const y = centerY + radius * (0.4 - progress * 1.1);
+          context.save();
+          context.translate(x, y);
+          context.rotate(side * (-0.75 + progress * 0.9));
+          context.beginPath();
+          context.ellipse(0, 0, radius * 0.11, radius * 0.035, 0, 0, Math.PI * 2);
+          context.fill();
+          context.restore();
+        }
+      });
+      context.restore();
+    }
+
+    function drawTrophy(context, centerX, centerY, size, theme, opacity = 0.18) {
+      context.save();
+      context.globalAlpha = opacity;
+      const trophyGradient = context.createLinearGradient(centerX - size, centerY, centerX + size, centerY);
+      trophyGradient.addColorStop(0, theme.accent);
+      trophyGradient.addColorStop(0.5, theme.accentLight);
+      trophyGradient.addColorStop(1, theme.accent);
+      context.fillStyle = trophyGradient;
+      context.strokeStyle = theme.accentLight;
+      context.lineWidth = Math.max(4, size * 0.035);
+
+      context.beginPath();
+      context.moveTo(centerX - size * 0.46, centerY - size * 0.48);
+      context.lineTo(centerX + size * 0.46, centerY - size * 0.48);
+      context.quadraticCurveTo(centerX + size * 0.38, centerY + size * 0.08, centerX, centerY + size * 0.22);
+      context.quadraticCurveTo(centerX - size * 0.38, centerY + size * 0.08, centerX - size * 0.46, centerY - size * 0.48);
+      context.fill();
+
+      context.beginPath();
+      context.arc(centerX - size * 0.47, centerY - size * 0.18, size * 0.31, Math.PI * 0.52, Math.PI * 1.48);
+      context.stroke();
+      context.beginPath();
+      context.arc(centerX + size * 0.47, centerY - size * 0.18, size * 0.31, -Math.PI * 0.48, Math.PI * 0.48);
+      context.stroke();
+      context.fillRect(centerX - size * 0.07, centerY + size * 0.18, size * 0.14, size * 0.38);
+      fillRoundedRect(context, centerX - size * 0.29, centerY + size * 0.5, size * 0.58, size * 0.12, size * 0.03, trophyGradient);
+
+      context.fillStyle = colorWithAlpha(theme.background[0], 0.78);
+      context.beginPath();
+      for (let point = 0; point < 10; point += 1) {
+        const angle = -Math.PI / 2 + point * Math.PI / 5;
+        const radius = point % 2 === 0 ? size * 0.17 : size * 0.075;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY - size * 0.15 + Math.sin(angle) * radius;
+        if (point === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.closePath();
+      context.fill();
+      context.restore();
+    }
+
+    function drawCrown(context, centerX, topY, width, theme, opacity = 0.56) {
+      const height = width * 0.52;
+      context.save();
+      context.globalAlpha = opacity;
+      const crownGradient = context.createLinearGradient(centerX - width / 2, topY, centerX + width / 2, topY + height);
+      crownGradient.addColorStop(0, theme.accent);
+      crownGradient.addColorStop(0.5, theme.accentLight);
+      crownGradient.addColorStop(1, theme.accent);
+      context.fillStyle = crownGradient;
+      context.beginPath();
+      context.moveTo(centerX - width * 0.48, topY + height * 0.75);
+      context.lineTo(centerX - width * 0.42, topY + height * 0.18);
+      context.lineTo(centerX - width * 0.17, topY + height * 0.5);
+      context.lineTo(centerX, topY);
+      context.lineTo(centerX + width * 0.17, topY + height * 0.5);
+      context.lineTo(centerX + width * 0.42, topY + height * 0.18);
+      context.lineTo(centerX + width * 0.48, topY + height * 0.75);
+      context.closePath();
+      context.fill();
+      fillRoundedRect(context, centerX - width * 0.5, topY + height * 0.7, width, height * 0.2, height * 0.06, crownGradient);
+      context.fillStyle = theme.plane;
+      [-0.28, 0, 0.28].forEach((offset) => {
+        context.beginPath();
+        context.arc(centerX + width * offset, topY + height * 0.72, width * 0.045, 0, Math.PI * 2);
+        context.fill();
+      });
+      context.restore();
+    }
+
+    function drawFlameField(context, width, height, theme) {
+      context.save();
+      const flameGradient = context.createLinearGradient(0, height * 0.32, 0, height);
+      flameGradient.addColorStop(0, colorWithAlpha(theme.accentLight, 0.05));
+      flameGradient.addColorStop(0.55, colorWithAlpha(theme.accent, 0.28));
+      flameGradient.addColorStop(1, colorWithAlpha(theme.plane, 0.58));
+      context.fillStyle = flameGradient;
+      for (let index = 0; index < 14; index += 1) {
+        const baseX = index * width / 13 - width * 0.04;
+        const flameWidth = width * (0.06 + (index % 3) * 0.012);
+        const flameHeight = height * (0.16 + ((index * 7) % 5) * 0.035);
+        const baseY = height * 0.94;
+        context.beginPath();
+        context.moveTo(baseX - flameWidth * 0.55, baseY);
+        context.bezierCurveTo(
+          baseX - flameWidth * 0.4,
+          baseY - flameHeight * 0.35,
+          baseX - flameWidth * 0.05,
+          baseY - flameHeight * 0.68,
+          baseX + flameWidth * 0.02,
+          baseY - flameHeight
+        );
+        context.bezierCurveTo(
+          baseX + flameWidth * 0.48,
+          baseY - flameHeight * 0.5,
+          baseX + flameWidth * 0.58,
+          baseY - flameHeight * 0.22,
+          baseX + flameWidth * 0.55,
+          baseY
+        );
+        context.closePath();
+        context.fill();
+      }
+      context.restore();
+    }
+
+    function drawRibbonWaves(context, width, height, theme, opacity = 0.32) {
+      context.save();
+      context.globalAlpha = opacity;
+      context.lineCap = "round";
+      for (let index = 0; index < 5; index += 1) {
+        const y = height * (0.82 + index * 0.022);
+        const wave = context.createLinearGradient(0, y, width, y - height * 0.12);
+        wave.addColorStop(0, theme.accent);
+        wave.addColorStop(0.35, theme.plane);
+        wave.addColorStop(0.68, theme.accentLight);
+        wave.addColorStop(1, theme.accent);
+        context.strokeStyle = wave;
+        context.lineWidth = Math.max(5, height * (0.018 - index * 0.002));
+        context.beginPath();
+        context.moveTo(-width * 0.04, y);
+        context.bezierCurveTo(width * 0.24, y - height * 0.18, width * 0.52, y + height * 0.08, width * 1.04, y - height * 0.13);
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    function drawTechGrid(context, width, height, theme) {
+      context.save();
+      context.strokeStyle = colorWithAlpha(theme.accent, 0.12);
+      context.lineWidth = 1;
+      const grid = Math.max(38, Math.round(width / 28));
+      for (let x = 0; x <= width; x += grid) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, height);
+        context.stroke();
+      }
+      for (let y = 0; y <= height; y += grid) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(width, y);
+        context.stroke();
+      }
+
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.34);
+      context.fillStyle = colorWithAlpha(theme.accent, 0.68);
+      for (let index = 0; index < 24; index += 1) {
+        const startX = (index * 173) % width;
+        const startY = (index * 97) % Math.round(height * 0.72);
+        context.beginPath();
+        context.moveTo(startX, startY);
+        context.lineTo(startX + 28, startY);
+        context.lineTo(startX + 44, startY + (index % 2 === 0 ? 16 : -16));
+        context.lineTo(startX + 78, startY + (index % 2 === 0 ? 16 : -16));
+        context.stroke();
+        context.beginPath();
+        context.arc(startX, startY, 3, 0, Math.PI * 2);
+        context.fill();
+      }
+
+      const skylineBase = height * 0.88;
+      for (let index = 0; index < 36; index += 1) {
+        const buildingWidth = width / 48;
+        const buildingHeight = height * (0.035 + ((index * 31) % 11) * 0.009);
+        context.fillStyle = colorWithAlpha(index % 3 === 0 ? theme.accentLight : theme.accent, 0.14 + (index % 4) * 0.025);
+        context.fillRect(index * width / 35 - buildingWidth * 0.5, skylineBase - buildingHeight, buildingWidth, buildingHeight);
+      }
+      context.restore();
+    }
+
+    function drawRadialRays(context, width, height, theme, opacity = 0.16) {
+      context.save();
+      context.globalAlpha = opacity;
+      context.translate(width * 0.55, height * 0.72);
+      for (let index = 0; index < 28; index += 1) {
+        const angle = (Math.PI * 2 * index) / 28;
+        context.rotate(angle);
+        const ray = context.createLinearGradient(0, 0, width * 0.68, 0);
+        ray.addColorStop(0, theme.accentLight);
+        ray.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.fillStyle = ray;
+        context.beginPath();
+        context.moveTo(0, -height * 0.006);
+        context.lineTo(width * 0.68, -height * 0.018);
+        context.lineTo(width * 0.68, height * 0.018);
+        context.lineTo(0, height * 0.006);
+        context.closePath();
+        context.fill();
+      }
+      context.restore();
+    }
+
+    function drawAuroraField(context, width, height, theme) {
+      context.save();
+      const skyGlow = context.createRadialGradient(width * 0.62, height * 0.2, 8, width * 0.62, height * 0.2, width * 0.72);
+      skyGlow.addColorStop(0, colorWithAlpha(theme.accentLight, 0.3));
+      skyGlow.addColorStop(0.42, colorWithAlpha(theme.accent, 0.12));
+      skyGlow.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = skyGlow;
+      context.fillRect(0, 0, width, height * 0.72);
+
+      context.lineCap = "round";
+      for (let index = 0; index < 7; index += 1) {
+        const y = height * (0.28 + index * 0.082);
+        const ribbon = context.createLinearGradient(0, y, width, y - height * 0.16);
+        ribbon.addColorStop(0, colorWithAlpha(theme.accent, 0));
+        ribbon.addColorStop(0.26, colorWithAlpha(theme.accent, 0.44));
+        ribbon.addColorStop(0.58, colorWithAlpha(theme.accentLight, 0.82));
+        ribbon.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.strokeStyle = ribbon;
+        context.lineWidth = height * (0.026 - index * 0.0022);
+        context.beginPath();
+        context.moveTo(-width * 0.08, y + height * 0.06);
+        context.bezierCurveTo(width * 0.22, y - height * 0.2, width * 0.52, y + height * 0.16, width * 1.08, y - height * 0.18);
+        context.stroke();
+      }
+
+      for (let index = 0; index < 56; index += 1) {
+        const x = (index * 149) % width;
+        const y = (index * 67) % Math.round(height * 0.62);
+        const size = 1 + (index % 3);
+        context.fillStyle = colorWithAlpha(index % 4 === 0 ? theme.accentLight : theme.accent, 0.25 + (index % 4) * 0.1);
+        context.fillRect(x, y, size, size);
+      }
+
+      const horizon = context.createLinearGradient(0, height * 0.72, 0, height);
+      horizon.addColorStop(0, colorWithAlpha(theme.plane, 0));
+      horizon.addColorStop(1, colorWithAlpha(theme.plane, 0.75));
+      context.fillStyle = horizon;
+      context.fillRect(0, height * 0.68, width, height * 0.32);
+      context.restore();
+    }
+
+    function drawNebulaField(context, width, height, theme) {
+      context.save();
+      const haze = context.createRadialGradient(width * 0.72, height * 0.28, 10, width * 0.72, height * 0.28, width * 0.6);
+      haze.addColorStop(0, colorWithAlpha(theme.accentLight, 0.3));
+      haze.addColorStop(0.38, colorWithAlpha(theme.accent, 0.2));
+      haze.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = haze;
+      context.fillRect(0, 0, width, height);
+
+      context.globalAlpha = 0.58;
+      context.lineCap = "round";
+      for (let index = 0; index < 6; index += 1) {
+        const y = height * (0.22 + index * 0.105);
+        const band = context.createLinearGradient(0, y, width, y + height * 0.1);
+        band.addColorStop(0, colorWithAlpha(theme.accent, 0));
+        band.addColorStop(0.35, colorWithAlpha(theme.accent, 0.42));
+        band.addColorStop(0.65, colorWithAlpha(theme.accentLight, 0.7));
+        band.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.strokeStyle = band;
+        context.lineWidth = height * (0.018 - index * 0.0016);
+        context.beginPath();
+        context.moveTo(-width * 0.05, y);
+        context.bezierCurveTo(width * 0.25, y - height * 0.12, width * 0.62, y + height * 0.18, width * 1.06, y - height * 0.09);
+        context.stroke();
+      }
+
+      context.globalAlpha = 0.44;
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.68);
+      context.lineWidth = 2;
+      [0, 1, 2].forEach((index) => {
+        context.beginPath();
+        context.ellipse(width * 0.77, height * 0.31, width * (0.16 + index * 0.055), height * (0.055 + index * 0.02), -0.22, 0, Math.PI * 2);
+        context.stroke();
+      });
+
+      for (let index = 0; index < 72; index += 1) {
+        const x = (index * 113) % width;
+        const y = (index * 47) % Math.round(height * 0.78);
+        const size = index % 8 === 0 ? 3 : 1;
+        context.fillStyle = colorWithAlpha(index % 5 === 0 ? theme.accentLight : theme.accent, 0.28 + (index % 3) * 0.12);
+        context.fillRect(x, y, size, size);
+      }
+      context.restore();
+    }
+
+    function drawGlacierField(context, width, height, theme) {
+      context.save();
+      const sheen = context.createLinearGradient(0, 0, width, height);
+      sheen.addColorStop(0, colorWithAlpha(theme.accentLight, 0.58));
+      sheen.addColorStop(0.5, colorWithAlpha(theme.accentLight, 0.06));
+      sheen.addColorStop(1, colorWithAlpha(theme.accent, 0.25));
+      context.fillStyle = sheen;
+      context.fillRect(0, 0, width, height);
+
+      context.globalAlpha = 0.46;
+      for (let index = 0; index < 10; index += 1) {
+        const x = width * (0.03 + index * 0.105);
+        const top = height * (0.08 + (index % 3) * 0.05);
+        const bottom = height * (0.86 - (index % 2) * 0.08);
+        context.fillStyle = colorWithAlpha(index % 2 ? theme.accentLight : theme.accent, 0.22);
+        context.beginPath();
+        context.moveTo(x, top);
+        context.lineTo(x + width * 0.08, top + height * 0.1);
+        context.lineTo(x + width * 0.04, bottom);
+        context.lineTo(x - width * 0.05, bottom - height * 0.12);
+        context.closePath();
+        context.fill();
+      }
+
+      context.globalAlpha = 0.3;
+      context.strokeStyle = theme.accentLight;
+      context.lineWidth = 2;
+      for (let index = 0; index < 9; index += 1) {
+        const y = height * (0.12 + index * 0.09);
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(width, y - height * 0.2);
+        context.stroke();
+      }
+
+      const halo = context.createRadialGradient(width * 0.53, height * 0.18, 5, width * 0.53, height * 0.18, width * 0.52);
+      halo.addColorStop(0, colorWithAlpha(theme.accentLight, 0.5));
+      halo.addColorStop(1, colorWithAlpha(theme.accentLight, 0));
+      context.globalAlpha = 0.7;
+      context.fillStyle = halo;
+      context.fillRect(0, 0, width, height * 0.62);
+      context.restore();
+    }
+
+    function drawRoseField(context, width, height, theme) {
+      context.save();
+      const diagonal = context.createLinearGradient(0, height, width, 0);
+      diagonal.addColorStop(0, colorWithAlpha(theme.accent, 0.08));
+      diagonal.addColorStop(0.5, colorWithAlpha(theme.accentLight, 0.2));
+      diagonal.addColorStop(1, colorWithAlpha(theme.accent, 0.04));
+      context.fillStyle = diagonal;
+      context.fillRect(0, 0, width, height);
+
+      context.globalAlpha = 0.36;
+      for (let index = 0; index < 9; index += 1) {
+        const startX = width * (-0.08 + index * 0.16);
+        const band = context.createLinearGradient(startX, height, startX + width * 0.28, 0);
+        band.addColorStop(0, colorWithAlpha(theme.accent, 0));
+        band.addColorStop(0.5, colorWithAlpha(theme.accentLight, 0.34));
+        band.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.fillStyle = band;
+        context.beginPath();
+        context.moveTo(startX, height);
+        context.lineTo(startX + width * 0.07, height);
+        context.lineTo(startX + width * 0.35, 0);
+        context.lineTo(startX + width * 0.27, 0);
+        context.closePath();
+        context.fill();
+      }
+
+      context.globalAlpha = 0.52;
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.78);
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(width * 0.82, height * 0.24, width * 0.18, 0.1, Math.PI * 1.35);
+      context.stroke();
+      context.beginPath();
+      context.arc(width * 0.82, height * 0.24, width * 0.24, 0.14, Math.PI * 1.3);
+      context.stroke();
+
+      for (let index = 0; index < 20; index += 1) {
+        const x = (index * 127) % width;
+        const y = (index * 83) % height;
+        context.fillStyle = colorWithAlpha(index % 3 === 0 ? theme.accentLight : theme.accent, 0.18 + (index % 3) * 0.1);
+        context.fillRect(x, y, 2, 2);
+      }
+      context.restore();
+    }
+
+    function drawTemplateDecorations(context, width, height, theme, layout) {
+      if (theme.style === "laurel") {
+        drawLaurelWreath(context, layout.title.centerX, layout.title.y - layout.title.size * 0.28, layout.title.size * 1.05, theme, 0.28);
+        drawUpwardChart(context, width, height, theme, 0.34);
+        drawRibbonWaves(context, width, height, theme, 0.3);
+        return;
+      }
+      if (theme.style === "champion") {
+        drawRadialRays(context, width, height, theme, 0.23);
+        drawTrophy(context, width * 0.46, height * 0.72, Math.min(width, height) * 0.18, theme, 0.17);
+        drawCrown(context, layout.title.centerX, Math.max(30, layout.title.y - layout.title.size * 1.23), layout.title.size * 0.72, theme, 0.72);
+        drawUpwardChart(context, width, height, theme, 0.3);
+        drawRibbonWaves(context, width, height, theme, 0.42);
+        return;
+      }
+      if (theme.style === "tech") {
+        drawTechGrid(context, width, height, theme);
+        drawUpwardChart(context, width, height, theme, 0.42);
+        return;
+      }
+      if (theme.style === "luxury") {
+        const spotlight = context.createLinearGradient(width, 0, width * 0.38, height * 0.72);
+        spotlight.addColorStop(0, colorWithAlpha(theme.accentLight, 0.38));
+        spotlight.addColorStop(0.34, colorWithAlpha(theme.accent, 0.1));
+        spotlight.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.fillStyle = spotlight;
+        context.fillRect(0, 0, width, height);
+        drawLaurelWreath(context, layout.title.centerX, layout.title.y - layout.title.size * 0.3, layout.title.size * 1.08, theme, 0.22);
+        drawRibbonWaves(context, width, height, theme, 0.38);
+        drawUpwardChart(context, width, height, theme, 0.2);
+        return;
+      }
+      if (theme.style === "flame") {
+        drawRadialRays(context, width, height, theme, 0.19);
+        drawFlameField(context, width, height, theme);
+        drawRibbonWaves(context, width, height, theme, 0.56);
+        drawTrophy(context, width * 0.86, height * 0.2, Math.min(width, height) * 0.17, theme, 0.2);
+        drawUpwardChart(context, width, height, theme, 0.22);
+      }
+    }
+
+    function drawPhotoBackground(context, width, height, theme) {
+      if (reportBg) {
+        coverRect(context, reportBg, 0, 0, width, height, 0.5);
+        context.fillStyle = theme.style === "glacier" ? "rgba(255, 255, 255, 0.38)" : "rgba(10, 14, 20, 0.52)";
+        context.fillRect(0, 0, width, height);
+        return;
+      }
+      const background = context.createLinearGradient(0, 0, width, height);
+      background.addColorStop(0, theme.background[0]);
+      background.addColorStop(0.56, theme.background[1]);
+      background.addColorStop(1, theme.background[2]);
+      context.fillStyle = background;
+      context.fillRect(0, 0, width, height);
+    }
+
+    function drawPremiumBackground(context, width, height, theme, layout) {
+      drawPhotoBackground(context, width, height, theme);
+
+      drawTemplateDecorations(context, width, height, theme, layout);
+
+      const leftShade = context.createLinearGradient(0, 0, layout.leftShadeWidth, 0);
+      leftShade.addColorStop(0, colorWithAlpha(theme.panelAlt, 0.96));
+      leftShade.addColorStop(0.7, colorWithAlpha(theme.background[0], 0.78));
+      leftShade.addColorStop(1, colorWithAlpha(theme.background[0], 0));
+      context.fillStyle = leftShade;
+      context.fillRect(0, 0, layout.leftShadeWidth + 70, layout.footerY);
+
+      context.save();
+      context.beginPath();
+      context.moveTo(width * 0.34, 0);
+      context.lineTo(width, 0);
+      context.lineTo(width, height * 0.5);
+      context.lineTo(width * 0.66, height * 0.58);
+      context.lineTo(width * 0.35, height * 0.49);
+      context.closePath();
+      const plane = context.createLinearGradient(width * 0.35, 0, width, height * 0.58);
+      plane.addColorStop(0, colorWithAlpha(theme.plane, 0.1));
+      plane.addColorStop(0.58, colorWithAlpha(theme.plane, 0.38));
+      plane.addColorStop(1, colorWithAlpha(theme.plane, 0.04));
+      context.fillStyle = plane;
+      context.fill();
+      context.restore();
+
+      const glowX = layout.title.centerX;
+      const glowY = layout.title.y;
+      const glow = context.createRadialGradient(glowX, glowY, 20, glowX, glowY, width * 0.38);
+      glow.addColorStop(0, colorWithAlpha(theme.accent, 0.16));
+      glow.addColorStop(0.55, colorWithAlpha(theme.accent, 0.05));
+      glow.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
+
+      context.save();
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.1);
+      context.lineWidth = 1;
+      for (let index = 0; index < 7; index += 1) {
+        context.beginPath();
+        context.moveTo(width - 260 + index * 34, 0);
+        context.lineTo(width, 150 + index * 26);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, height - 210 + index * 28);
+        context.lineTo(220 + index * 34, height);
+        context.stroke();
+      }
+      context.restore();
+
+      context.fillStyle = colorWithAlpha(theme.accentLight, 0.48);
+      for (let index = 0; index < 46; index += 1) {
+        const x = (index * 197) % width;
+        const y = (index * 109) % height;
+        const size = index % 11 === 0 ? 2 : 0.8;
+        context.fillRect(x, y, size, size);
+      }
+
+      context.strokeStyle = colorWithAlpha(theme.accent, 0.72);
+      context.lineWidth = 3;
+      context.strokeRect(13, 13, width - 26, height - 26);
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.13);
+      context.lineWidth = 1;
+      context.strokeRect(22, 22, width - 44, height - 44);
+    }
+
+    function drawPremiumTitle(context, title, theme) {
+      context.save();
+      const gold = context.createLinearGradient(
+        title.centerX - title.size * 1.6,
+        0,
+        title.centerX + title.size * 1.6,
+        0
+      );
+      gold.addColorStop(0, theme.accent);
+      gold.addColorStop(0.48, theme.accentLight);
+      gold.addColorStop(1, theme.accent);
+      context.fillStyle = gold;
+      context.textAlign = "center";
+      context.shadowColor = "rgba(0, 0, 0, 0.72)";
+      context.shadowBlur = 18;
+      context.shadowOffsetY = 9;
+      context.font = `900 ${title.size}px "STKaiti", "KaiTi", "Microsoft YaHei", serif`;
+      context.fillText("星普战报", title.centerX, title.y);
+      context.shadowColor = "transparent";
+      const englishTitles = {
+        laurel: "V I C T O R Y   B U L L E T I N",
+        champion: "C H A M P I O N   R E P O R T",
+        tech: "P E R F O R M A N C E   U P D A T E",
+        luxury: "E L I T E   V I C T O R Y",
+        flame: "B A T T L E   R E P O R T"
+      };
+      context.fillStyle = colorWithAlpha(theme.text, 0.9);
+      context.font = '700 22px Arial, sans-serif';
+      context.fillText(englishTitles[theme.style] || "V I C T O R Y   R E P O R T", title.centerX, title.englishY);
+
+      const divider = context.createLinearGradient(title.centerX - 330, 0, title.centerX + 330, 0);
+      divider.addColorStop(0, colorWithAlpha(theme.accent, 0));
+      divider.addColorStop(0.3, colorWithAlpha(theme.accent, 0.72));
+      divider.addColorStop(0.7, colorWithAlpha(theme.accent, 0.72));
+      divider.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = divider;
+      context.fillRect(title.centerX - 330, title.lineY, 660, 2);
+
+      context.fillStyle = theme.accentLight;
+      context.font = '900 40px "STKaiti", "KaiTi", serif';
+      context.fillText("剑锋所指，势不可挡！", title.centerX, title.sloganY);
+      context.restore();
+    }
+
+    function drawPremiumPortrait(context, portrait, employee, rect, theme) {
+      const { x, y, width, height } = rect;
+      context.save();
+      context.shadowColor = colorWithAlpha(theme.accent, 0.3);
+      context.shadowBlur = 24;
+      fillRoundedRect(context, x - 4, y - 4, width + 8, height + 8, 11, theme.panel);
+      context.shadowColor = "transparent";
+      roundedRectPath(context, x, y, width, height, 8);
+      context.clip();
+      coverRect(context, portrait, x, y, width, height, employee.positionY);
+
+      const bottomTint = context.createLinearGradient(x, y + height * 0.62, x, y + height);
+      bottomTint.addColorStop(0, "rgba(3, 4, 6, 0)");
+      bottomTint.addColorStop(1, colorWithAlpha(theme.panel, 0.96));
+      context.fillStyle = bottomTint;
+      context.fillRect(x, y + height * 0.55, width, height * 0.45);
+      context.restore();
+      strokeRoundedRect(context, x, y, width, height, 8, colorWithAlpha(theme.accent, 0.88), 3);
+      strokeRoundedRect(context, x + 8, y + 8, width - 16, height - 16, 5, colorWithAlpha(theme.accentLight, 0.13), 1);
+
+      const badgeHeight = Math.max(46, height * 0.12);
+      fillRoundedRect(context, x + 16, y + height - badgeHeight - 18, width - 32, badgeHeight, 4, colorWithAlpha(theme.plane, 0.88));
+      context.fillStyle = theme.accent;
+      context.fillRect(x + width * 0.16, y + height - badgeHeight - 18, width * 0.68, 2);
+      context.fillStyle = theme.text;
+      context.font = `900 ${Math.max(28, width * 0.1)}px Arial, sans-serif`;
+      context.textAlign = "center";
+      context.fillText(employee.name, x + width / 2, y + height - badgeHeight * 0.3 - 18);
+    }
+
+    function drawPremiumAnnouncement(context, announcement, employeeName, customerType, theme) {
+      const { x, y, width } = announcement;
+      context.save();
+      const panelGradient = context.createLinearGradient(x, y, x + width, y);
+      panelGradient.addColorStop(0, colorWithAlpha(theme.panelAlt, 0.9));
+      panelGradient.addColorStop(1, colorWithAlpha(theme.panel, 0.42));
+      fillRoundedRect(context, x - 14, y - 18, width + 28, 158, 8, panelGradient);
+      strokeRoundedRect(context, x - 14, y - 18, width + 28, 158, 8, colorWithAlpha(theme.accent, 0.55), 1.5);
+      context.fillStyle = theme.accent;
+      context.fillRect(x, y, 4, 126);
+      context.textAlign = "left";
+      context.fillStyle = colorWithAlpha(theme.text, 0.82);
+      context.font = '800 27px "Microsoft YaHei", sans-serif';
+      context.fillText("热烈祝贺", x + 24, y + 27);
+
+      let nameSize = width < 500 ? 47 : 54;
+      context.fillStyle = theme.accentLight;
+      context.font = `900 ${nameSize}px Arial, sans-serif`;
+      context.fillText(employeeName, x + 24, y + 84);
+      const nameWidth = context.measureText(employeeName).width;
+      context.fillStyle = theme.text;
+      context.font = `900 ${width < 500 ? 35 : 40}px "Microsoft YaHei", sans-serif`;
+      context.fillText("成功开单！", x + 37 + nameWidth, y + 82);
+
+      const lineLabel = customerType === "新客户" ? "新客首单，专业赢得信任" : "老客续单，服务赢得长久";
+      context.fillStyle = theme.muted;
+      context.font = '700 23px "Microsoft YaHei", sans-serif';
+      context.fillText(lineLabel, x + 24, y + 122);
+      context.restore();
+    }
+
+    function drawPremiumAmount(context, rect, amount, currency, customerType, dateText, theme) {
+      const { x, y, width, height } = rect;
+      const panelGradient = context.createLinearGradient(x, y, x, y + height);
+      panelGradient.addColorStop(0, theme.panelAlt);
+      panelGradient.addColorStop(1, theme.panel);
+      fillRoundedRect(context, x, y, width, height, 10, panelGradient);
+      strokeRoundedRect(context, x, y, width, height, 10, colorWithAlpha(theme.accent, 0.88), 2);
+      strokeRoundedRect(context, x + 8, y + 8, width - 16, height - 16, 6, colorWithAlpha(theme.accentLight, 0.1), 1);
+
+      context.save();
+      context.textAlign = "center";
+      context.fillStyle = theme.text;
+      context.font = `900 ${Math.max(28, width * 0.1)}px "Microsoft YaHei", sans-serif`;
+      context.fillText("星普战报", x + width / 2, y + height * 0.14);
+      context.fillStyle = colorWithAlpha(theme.accent, 0.76);
+      context.font = '600 13px Arial, sans-serif';
+      context.fillText("SIGNED ORDER", x + width / 2, y + height * 0.21);
+
+      context.fillStyle = theme.muted;
+      context.font = `700 ${Math.max(17, width * 0.06)}px "Microsoft YaHei", sans-serif`;
+      context.fillText("成功签单金额", x + width / 2, y + height * 0.35);
+
+      const amountText = `${currency} ${amount}`;
+      let amountSize = Math.max(38, width * 0.17);
+      context.font = `900 ${amountSize}px Arial, sans-serif`;
+      while (context.measureText(amountText).width > width - 24 && amountSize > 28) {
+        amountSize -= 2;
+        context.font = `900 ${amountSize}px Arial, sans-serif`;
+      }
+      const amountGold = context.createLinearGradient(x + 24, 0, x + width - 24, 0);
+      amountGold.addColorStop(0, theme.accent);
+      amountGold.addColorStop(0.5, theme.accentLight);
+      amountGold.addColorStop(1, theme.accent);
+      context.fillStyle = amountGold;
+      context.fillText(amountText, x + width / 2, y + height * 0.52);
+
+      const tagWidth = Math.min(width - 80, 150);
+      const tagHeight = Math.max(32, height * 0.09);
+      fillRoundedRect(context, x + (width - tagWidth) / 2, y + height * 0.58, tagWidth, tagHeight, tagHeight / 2, colorWithAlpha(theme.plane, 0.68));
+      strokeRoundedRect(context, x + (width - tagWidth) / 2, y + height * 0.58, tagWidth, tagHeight, tagHeight / 2, colorWithAlpha(theme.accent, 0.66), 1);
+      context.fillStyle = theme.text;
+      context.font = `800 ${Math.max(16, width * 0.055)}px "Microsoft YaHei", sans-serif`;
+      context.fillText(customerType, x + width / 2, y + height * 0.58 + tagHeight * 0.67);
+
+      context.fillStyle = theme.accentLight;
+      context.font = `900 ${Math.max(22, width * 0.08)}px "STKaiti", "KaiTi", serif`;
+      context.fillText(customerType === "新客户" ? "开局即冲刺" : "信任再续约", x + width / 2, y + height * 0.79);
+      context.fillStyle = theme.text;
+      context.fillText("我们势不可挡！", x + width / 2, y + height * 0.88);
+
+      context.fillStyle = colorWithAlpha(theme.muted, 0.62);
+      context.font = `600 ${Math.max(13, width * 0.043)}px Arial, sans-serif`;
+      context.fillText(dateText, x + width / 2, y + height * 0.96);
+      context.restore();
+    }
+
+    function drawPremiumScreenshot(context, rect, screenshot, fitMode, theme) {
+      const { x, y, width, height } = rect;
+      fillRoundedRect(context, x, y, width, height, 9, theme.panel);
+      strokeRoundedRect(context, x, y, width, height, 9, colorWithAlpha(theme.accent, 0.9), 2);
+      strokeRoundedRect(context, x + 8, y + 8, width - 16, height - 16, 6, colorWithAlpha(theme.accentLight, 0.1), 1);
+
+      const innerX = x + 12;
+      const innerY = y + 12;
+      const innerWidth = width - 24;
+      const innerHeight = height - 24;
+      context.save();
+      roundedRectPath(context, innerX, innerY, innerWidth, innerHeight, 5);
+      context.clip();
+      const emptyBackground = context.createLinearGradient(innerX, innerY, innerX, innerY + innerHeight);
+      emptyBackground.addColorStop(0, theme.panelAlt);
+      emptyBackground.addColorStop(1, theme.background[0]);
+      context.fillStyle = emptyBackground;
+      context.fillRect(innerX, innerY, innerWidth, innerHeight);
+
+      if (screenshot) {
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+        if (fitMode === "cover") {
+          coverRect(context, screenshot, innerX, innerY, innerWidth, innerHeight, 0.5);
+          const edgeShade = context.createLinearGradient(innerX, innerY, innerX, innerY + innerHeight);
+          edgeShade.addColorStop(0, "rgba(0, 0, 0, 0.04)");
+          edgeShade.addColorStop(0.82, "rgba(0, 0, 0, 0.02)");
+          edgeShade.addColorStop(1, "rgba(0, 0, 0, 0.18)");
+          context.fillStyle = edgeShade;
+          context.fillRect(innerX, innerY, innerWidth, innerHeight);
+        } else {
+          context.save();
+          context.filter = "blur(24px) brightness(0.38) saturate(1.12)";
+          coverRect(context, screenshot, innerX - 34, innerY - 34, innerWidth + 68, innerHeight + 68, 0.5);
+          context.restore();
+          context.fillStyle = "rgba(2, 3, 5, 0.3)";
+          context.fillRect(innerX, innerY, innerWidth, innerHeight);
+          const imageRect = calculateContainRect(screenshot, innerX + 14, innerY + 14, innerWidth - 28, innerHeight - 28);
+          context.shadowColor = "rgba(0, 0, 0, 0.74)";
+          context.shadowBlur = 22;
+          context.shadowOffsetY = 7;
+          context.drawImage(screenshot, imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+          context.shadowColor = "transparent";
+          context.strokeStyle = colorWithAlpha(theme.accentLight, 0.4);
+          context.lineWidth = 1;
+          context.strokeRect(imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+        }
+      } else {
+        const placeholderGlow = context.createRadialGradient(
+          innerX + innerWidth / 2,
+          innerY + innerHeight / 2,
+          10,
+          innerX + innerWidth / 2,
+          innerY + innerHeight / 2,
+          Math.min(innerWidth, innerHeight) * 0.46
+        );
+        placeholderGlow.addColorStop(0, colorWithAlpha(theme.accent, 0.18));
+        placeholderGlow.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.fillStyle = placeholderGlow;
+        context.fillRect(innerX, innerY, innerWidth, innerHeight);
+        const iconSize = Math.min(72, innerHeight * 0.22);
+        strokeRoundedRect(context, innerX + innerWidth / 2 - iconSize / 2, innerY + innerHeight / 2 - iconSize / 2, iconSize, iconSize, 6, colorWithAlpha(theme.accent, 0.72), 2);
+        context.fillStyle = theme.accent;
+        context.font = `300 ${Math.max(36, iconSize * 0.66)}px Arial, sans-serif`;
+        context.textAlign = "center";
+        context.fillText("+", innerX + innerWidth / 2, innerY + innerHeight / 2 + iconSize * 0.23);
+        context.fillStyle = colorWithAlpha(theme.text, 0.68);
+        context.font = `700 ${Math.max(18, Math.min(width, height) * 0.05)}px "Microsoft YaHei", sans-serif`;
+        context.fillText("上传开单截图", innerX + innerWidth / 2, innerY + innerHeight / 2 + iconSize * 1.1);
+      }
+      context.restore();
+    }
+
+    function drawPremiumFooter(context, width, height, footerY, theme, ratioKey) {
+      context.save();
+      const band = context.createLinearGradient(0, footerY, 0, height);
+      band.addColorStop(0, colorWithAlpha(theme.panelAlt, 0.12));
+      band.addColorStop(1, colorWithAlpha(theme.background[0], 0.9));
+      context.fillStyle = band;
+      context.fillRect(14, footerY, width - 28, height - footerY - 14);
+
+      const divider = context.createLinearGradient(40, 0, width - 40, 0);
+      divider.addColorStop(0, colorWithAlpha(theme.accent, 0));
+      divider.addColorStop(0.18, colorWithAlpha(theme.accent, 0.76));
+      divider.addColorStop(0.82, colorWithAlpha(theme.accent, 0.76));
+      divider.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = divider;
+      context.fillRect(40, footerY + 10, width - 80, 2);
+
+      context.textAlign = "center";
+      const availableHeight = height - footerY;
+      context.fillStyle = colorWithAlpha(theme.text, 0.76);
+      context.font = `700 ${ratioKey === "landscape" ? 20 : 25}px "Microsoft YaHei", sans-serif`;
+      context.fillText("每一份努力都值得被看见，每一次突破都在成就更强的我们", width / 2, footerY + availableHeight * 0.42);
+
+      const slogan = context.createLinearGradient(width * 0.28, 0, width * 0.72, 0);
+      slogan.addColorStop(0, theme.accent);
+      slogan.addColorStop(0.5, theme.accentLight);
+      slogan.addColorStop(1, theme.accent);
+      context.fillStyle = slogan;
+      context.font = `900 ${ratioKey === "landscape" ? 34 : 50}px "STKaiti", "KaiTi", serif`;
+      context.fillText("剑锋所指，势不可挡！", width / 2, footerY + availableHeight * 0.82);
+      context.restore();
+    }
+
+    function formatReportDate(value) {
+      return value || localToday();
+    }
+
+    const nativeTemplateLayouts = {
+      laurel: {
+        title: "星普战报",
+        subtitle: "VICTORY BULLETIN",
+        portrait: { x: 48, y: 322, width: 330, height: 452 },
+        info: { x: 418, y: 344, width: 592, height: 398 },
+        screenshot: { x: 1052, y: 322, width: 500, height: 452 },
+        surface: "#fff8e8",
+        surfaceAlt: "#efe3c8",
+        ink: "#0a5632",
+        softInk: "#557565",
+        header: "#075f37"
+      },
+      champion: {
+        title: "星普战报",
+        subtitle: "CHAMPION PERFORMANCE",
+        portrait: { x: 298, y: 356, width: 284, height: 382 },
+        info: { x: 612, y: 354, width: 500, height: 388 },
+        screenshot: { x: 1142, y: 354, width: 410, height: 388 },
+        surface: "#fff5df",
+        surfaceAlt: "#f2dab1",
+        ink: "#a9160b",
+        softInk: "#98574a",
+        header: "#bd1408"
+      },
+      tech: {
+        title: "星普战报",
+        subtitle: "PERFORMANCE UPDATE",
+        portrait: { x: 48, y: 220, width: 360, height: 492 },
+        info: { x: 448, y: 314, width: 658, height: 390 },
+        screenshot: { x: 1150, y: 272, width: 402, height: 438 },
+        surface: "#eaf6ff",
+        surfaceAlt: "#c9e3f6",
+        ink: "#123d8f",
+        softInk: "#5474a2",
+        header: "#075dcc"
+      },
+      luxury: {
+        title: "星普战报",
+        subtitle: "ELITE VICTORY REPORT",
+        portrait: { x: 92, y: 224, width: 332, height: 494 },
+        info: { x: 470, y: 350, width: 646, height: 360 },
+        screenshot: { x: 1160, y: 286, width: 382, height: 430 },
+        surface: "#271f12",
+        surfaceAlt: "#453419",
+        ink: "#f4cb70",
+        softInk: "#cbb98e",
+        header: "#5c4218"
+      },
+      flame: {
+        title: "星普战报",
+        subtitle: "BATTLE VICTORY REPORT",
+        portrait: { x: 54, y: 292, width: 350, height: 438 },
+        info: { x: 448, y: 366, width: 514, height: 370 },
+        screenshot: { x: 1010, y: 354, width: 540, height: 390 },
+        surface: "#fff2dc",
+        surfaceAlt: "#f0d2a8",
+        ink: "#a50f09",
+        softInk: "#9b5b4a",
+        header: "#b50e08"
+      },
+      aurora: {
+        title: "星普战报",
+        subtitle: "AURORA MOMENT",
+        portrait: { x: 48, y: 304, width: 330, height: 470 },
+        info: { x: 420, y: 342, width: 594, height: 400 },
+        screenshot: { x: 1050, y: 304, width: 502, height: 470 },
+        surface: "#f2fffb",
+        surfaceAlt: "#d8f1e8",
+        ink: "#0d5660",
+        softInk: "#4f7a83",
+        header: "#08706e"
+      },
+      nebula: {
+        title: "星普战报",
+        subtitle: "NEBULA PERFORMANCE",
+        portrait: { x: 48, y: 292, width: 332, height: 482 },
+        info: { x: 420, y: 338, width: 594, height: 404 },
+        screenshot: { x: 1050, y: 292, width: 502, height: 482 },
+        surface: "#fff5ff",
+        surfaceAlt: "#ead8f2",
+        ink: "#622c7f",
+        softInk: "#805d8e",
+        header: "#7c3ca0"
+      },
+      glacier: {
+        title: "星普战报",
+        subtitle: "GLACIER MOMENT",
+        portrait: { x: 48, y: 292, width: 332, height: 482 },
+        info: { x: 420, y: 338, width: 594, height: 404 },
+        screenshot: { x: 1050, y: 292, width: 502, height: 482 },
+        surface: "#f5fbfe",
+        surfaceAlt: "#d7ebf2",
+        ink: "#184d73",
+        softInk: "#5d7c8f",
+        header: "#1b6a94"
+      },
+      rose: {
+        title: "星普战报",
+        subtitle: "ROSE GOLD VICTORY",
+        portrait: { x: 48, y: 292, width: 332, height: 482 },
+        info: { x: 420, y: 338, width: 594, height: 404 },
+        screenshot: { x: 1050, y: 292, width: 502, height: 482 },
+        surface: "#fff4f0",
+        surfaceAlt: "#f1d9dd",
+        ink: "#7b2948",
+        softInk: "#9a6577",
+        header: "#8f3155"
+      }
+    };
+
+    function drawNativeTemplateBackground(context, theme, layout) {
+      drawPhotoBackground(context, 1600, 900, theme);
+
+      if (theme.style === "laurel") {
+        drawRibbonWaves(context, 1600, 900, theme, 0.34);
+        drawUpwardChart(context, 1600, 900, theme, 0.24);
+        drawLaurelWreath(context, 800, 176, 190, theme, 0.42);
+      } else if (theme.style === "champion") {
+        drawRadialRays(context, 1600, 900, theme, 0.2);
+        drawTrophy(context, 150, 490, 220, theme, 0.78);
+        drawCrown(context, 800, 30, 116, theme, 0.88);
+        drawRibbonWaves(context, 1600, 900, theme, 0.48);
+      } else if (theme.style === "tech") {
+        drawTechGrid(context, 1600, 900, theme);
+        drawUpwardChart(context, 1600, 900, theme, 0.5);
+      } else if (theme.style === "luxury") {
+        const spotlight = context.createLinearGradient(1600, 0, 870, 610);
+        spotlight.addColorStop(0, colorWithAlpha(theme.accentLight, 0.44));
+        spotlight.addColorStop(0.34, colorWithAlpha(theme.accent, 0.12));
+        spotlight.addColorStop(1, colorWithAlpha(theme.accent, 0));
+        context.fillStyle = spotlight;
+        context.fillRect(0, 0, 1600, 900);
+        drawRibbonWaves(context, 1600, 900, theme, 0.4);
+        drawTrophy(context, 150, 690, 130, theme, 0.56);
+        drawUpwardChart(context, 1600, 900, theme, 0.28);
+      } else if (theme.style === "flame") {
+        drawRadialRays(context, 1600, 900, theme, 0.17);
+        drawFlameField(context, 1600, 900, theme);
+        drawRibbonWaves(context, 1600, 900, theme, 0.42);
+        drawTrophy(context, 1420, 188, 150, theme, 0.7);
+      } else if (theme.style === "aurora") {
+        drawAuroraField(context, 1600, 900, theme);
+        drawUpwardChart(context, 1600, 900, theme, 0.28);
+        drawRibbonWaves(context, 1600, 900, theme, 0.22);
+      } else if (theme.style === "nebula") {
+        drawNebulaField(context, 1600, 900, theme);
+        drawUpwardChart(context, 1600, 900, theme, 0.2);
+      } else if (theme.style === "glacier") {
+        drawGlacierField(context, 1600, 900, theme);
+        drawUpwardChart(context, 1600, 900, theme, 0.16);
+      } else if (theme.style === "rose") {
+        drawRoseField(context, 1600, 900, theme);
+        drawRibbonWaves(context, 1600, 900, theme, 0.26);
+        drawTrophy(context, 1430, 160, 125, theme, 0.44);
+      }
+
+      const glow = context.createRadialGradient(800, 170, 10, 800, 170, 520);
+      glow.addColorStop(0, colorWithAlpha(theme.accentLight, 0.17));
+      glow.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = glow;
+      context.fillRect(250, 0, 1100, 430);
+
+      context.strokeStyle = colorWithAlpha(theme.accent, 0.88);
+      context.lineWidth = 3;
+      context.strokeRect(12, 12, 1576, 876);
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.2);
+      context.lineWidth = 1;
+      context.strokeRect(22, 22, 1556, 856);
+    }
+
+    function drawNativeTemplateHeader(context, theme, layout) {
+      context.save();
+      drawCanvasBrand(context, theme, 48, 28, 1);
+
+      const titleGradient = context.createLinearGradient(500, 0, 1100, 0);
+      titleGradient.addColorStop(0, theme.accent);
+      titleGradient.addColorStop(0.5, theme.accentLight);
+      titleGradient.addColorStop(1, theme.accent);
+      context.fillStyle = titleGradient;
+      context.textAlign = "center";
+      context.shadowColor = colorWithAlpha(theme.background[0], 0.8);
+      context.shadowBlur = 18;
+      context.shadowOffsetY = 8;
+      const titleFont = theme.style === "tech"
+        ? '900 126px "Microsoft YaHei", sans-serif'
+        : `900 ${layout.title.length > 2 ? 134 : 168}px "STKaiti", "KaiTi", "Microsoft YaHei", serif`;
+      context.font = titleFont;
+      context.fillText(layout.title, 800, theme.style === "tech" ? 170 : 196);
+      context.shadowColor = "transparent";
+
+      context.fillStyle = colorWithAlpha(theme.text, 0.92);
+      context.font = '800 21px Arial, sans-serif';
+      context.fillText(layout.subtitle, 800, theme.style === "tech" ? 214 : 236);
+
+      const ribbonY = theme.style === "tech" ? 238 : 254;
+      const ribbon = context.createLinearGradient(480, 0, 1120, 0);
+      ribbon.addColorStop(0, colorWithAlpha(theme.header || theme.plane, 0.2));
+      ribbon.addColorStop(0.16, colorWithAlpha(layout.header, 0.92));
+      ribbon.addColorStop(0.84, colorWithAlpha(layout.header, 0.92));
+      ribbon.addColorStop(1, colorWithAlpha(theme.header || theme.plane, 0.2));
+      fillRoundedRect(context, 470, ribbonY, 660, 58, 6, ribbon);
+      strokeRoundedRect(context, 470, ribbonY, 660, 58, 6, colorWithAlpha(theme.accent, 0.86), 2);
+      context.fillStyle = theme.accentLight;
+      context.font = '900 35px "STKaiti", "KaiTi", "Microsoft YaHei", serif';
+      context.fillText("剑锋所指，势不可挡！", 800, ribbonY + 41);
+      context.restore();
+    }
+
+    function drawNativePortraitCard(context, portrait, employee, rect, theme, layout) {
+      context.save();
+      context.shadowColor = colorWithAlpha(theme.accent, 0.34);
+      context.shadowBlur = 22;
+      fillRoundedRect(context, rect.x, rect.y, rect.width, rect.height, 8, layout.surface);
+      context.shadowColor = "transparent";
+      strokeRoundedRect(context, rect.x, rect.y, rect.width, rect.height, 8, theme.accent, 3);
+      strokeRoundedRect(context, rect.x + 9, rect.y + 9, rect.width - 18, rect.height - 18, 5, colorWithAlpha(theme.accentLight, 0.46), 1);
+
+      const inset = 14;
+      roundedRectPath(context, rect.x + inset, rect.y + inset, rect.width - inset * 2, rect.height - inset * 2, 5);
+      context.clip();
+      coverRect(context, portrait, rect.x + inset, rect.y + inset, rect.width - inset * 2, rect.height - inset * 2, employee.positionY);
+      const tint = context.createLinearGradient(0, rect.y + rect.height * 0.62, 0, rect.y + rect.height);
+      tint.addColorStop(0, "rgba(0,0,0,0)");
+      tint.addColorStop(1, colorWithAlpha(theme.background[0], 0.82));
+      context.fillStyle = tint;
+      context.fillRect(rect.x + inset, rect.y + rect.height * 0.58, rect.width - inset * 2, rect.height * 0.42 - inset);
+      context.restore();
+
+      fillRoundedRect(context, rect.x + 22, rect.y + rect.height - 68, rect.width - 44, 48, 4, colorWithAlpha(layout.header, 0.94));
+      context.fillStyle = theme.accentLight;
+      context.textAlign = "center";
+      context.font = '900 30px Arial, sans-serif';
+      context.fillText(employee.name, rect.x + rect.width / 2, rect.y + rect.height - 34);
+    }
+
+    function drawFittedNativeText(context, text, x, y, maxWidth, initialSize, color, align = "center") {
+      context.save();
+      context.fillStyle = color;
+      context.textAlign = align;
+      context.textBaseline = "middle";
+      let size = initialSize;
+      context.font = `900 ${size}px "Microsoft YaHei", Arial, sans-serif`;
+      while (context.measureText(text).width > maxWidth && size > 15) {
+        size -= 1;
+        context.font = `900 ${size}px "Microsoft YaHei", Arial, sans-serif`;
+      }
+      context.fillText(text, x, y);
+      context.restore();
+    }
+
+    function drawNativeInfoPanel(context, rect, employee, theme, layout) {
+      const rows = [
+        { label: "出单英雄", value: employee.name },
+        { label: "开单金额", value: `RMB ${formatRmbAmount(state.amount)}`, amount: true },
+        { label: "客户类型", value: state.customer },
+        { label: "战报日期", value: formatReportDate(state.date).replace(/-/g, "/") }
+      ];
+      const headerHeight = 54;
+      const gap = 10;
+      const rowHeight = (rect.height - headerHeight - gap * 3) / 4;
+
+      context.save();
+      context.fillStyle = theme.accentLight;
+      context.font = '900 30px "Microsoft YaHei", sans-serif';
+      context.textAlign = "left";
+      context.fillText("开单信息", rect.x, rect.y + 36);
+      context.fillStyle = colorWithAlpha(theme.muted, 0.9);
+      context.font = '700 15px Arial, sans-serif';
+      context.fillText("SIGNED ORDER DETAILS", rect.x + 142, rect.y + 34);
+      context.restore();
+
+      rows.forEach((row, index) => {
+        const y = rect.y + headerHeight + index * (rowHeight + gap);
+        const labelWidth = Math.min(166, rect.width * 0.3);
+        const rowGradient = context.createLinearGradient(rect.x, y, rect.x + rect.width, y);
+        rowGradient.addColorStop(0, layout.surfaceAlt);
+        rowGradient.addColorStop(1, layout.surface);
+        fillRoundedRect(context, rect.x, y, rect.width, rowHeight, 6, rowGradient);
+        strokeRoundedRect(context, rect.x, y, rect.width, rowHeight, 6, colorWithAlpha(theme.accent, 0.82), 2);
+        fillRoundedRect(context, rect.x, y, labelWidth, rowHeight, 6, colorWithAlpha(layout.header, 0.96));
+
+        context.save();
+        context.fillStyle = theme.accentLight;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.font = '900 24px "Microsoft YaHei", sans-serif';
+        context.fillText(row.label, rect.x + labelWidth / 2, y + rowHeight / 2);
+        context.restore();
+
+        const valueX = rect.x + labelWidth + (rect.width - labelWidth) / 2;
+        drawFittedNativeText(
+          context,
+          row.value,
+          valueX,
+          y + rowHeight / 2,
+          rect.width - labelWidth - 24,
+          row.amount ? 32 : 27,
+          layout.ink
+        );
+      });
+    }
+
+    function drawNativeScreenshotCard(context, rect, screenshot, fitMode, theme, layout) {
+      fillRoundedRect(context, rect.x, rect.y, rect.width, rect.height, 8, layout.surface);
+      strokeRoundedRect(context, rect.x, rect.y, rect.width, rect.height, 8, theme.accent, 3);
+      strokeRoundedRect(context, rect.x + 9, rect.y + 9, rect.width - 18, rect.height - 18, 5, colorWithAlpha(theme.accentLight, 0.42), 1);
+
+      const headerHeight = 58;
+      const headerY = rect.y + 24;
+      fillRoundedRect(context, rect.x + 26, headerY, rect.width - 52, headerHeight, 7, colorWithAlpha(layout.header, 0.98));
+      strokeRoundedRect(context, rect.x + 26, headerY, rect.width - 52, headerHeight, 7, colorWithAlpha(theme.accent, 0.9), 2);
+      context.fillStyle = theme.accentLight;
+      context.font = '900 28px "Microsoft YaHei", sans-serif';
+      context.textAlign = "center";
+      context.fillText("订单展示", rect.x + rect.width / 2, headerY + 35);
+
+      const inner = {
+        x: rect.x + 16,
+        y: headerY + headerHeight + 12,
+        width: rect.width - 32,
+        height: rect.height - (headerY - rect.y) - headerHeight - 28
+      };
+      const innerGradient = context.createLinearGradient(inner.x, inner.y, inner.x, inner.y + inner.height);
+      innerGradient.addColorStop(0, layout.surface);
+      innerGradient.addColorStop(1, layout.surfaceAlt);
+      fillRoundedRect(context, inner.x, inner.y, inner.width, inner.height, 5, innerGradient);
+
+      context.save();
+      roundedRectPath(context, inner.x, inner.y, inner.width, inner.height, 5);
+      context.clip();
+      if (screenshot) {
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+        if (fitMode === "cover") {
+          coverRect(context, screenshot, inner.x, inner.y, inner.width, inner.height, 0.5);
+        } else {
+          context.save();
+          context.filter = "blur(22px) brightness(0.62)";
+          coverRect(context, screenshot, inner.x - 26, inner.y - 26, inner.width + 52, inner.height + 52, 0.5);
+          context.restore();
+          context.fillStyle = colorWithAlpha(layout.surface, 0.34);
+          context.fillRect(inner.x, inner.y, inner.width, inner.height);
+          const contained = calculateContainRect(screenshot, inner.x + 12, inner.y + 12, inner.width - 24, inner.height - 24);
+          context.drawImage(screenshot, contained.x, contained.y, contained.width, contained.height);
+        }
+      } else {
+        const iconSize = Math.min(94, inner.height * 0.28);
+        strokeRoundedRect(context, inner.x + inner.width / 2 - iconSize / 2, inner.y + inner.height / 2 - iconSize * 0.7, iconSize, iconSize * 0.82, 7, colorWithAlpha(layout.ink, 0.68), 4);
+        context.strokeStyle = colorWithAlpha(layout.ink, 0.62);
+        context.lineWidth = 4;
+        for (let index = 0; index < 3; index += 1) {
+          context.beginPath();
+          context.moveTo(inner.x + inner.width / 2 - iconSize * 0.28, inner.y + inner.height / 2 - iconSize * 0.42 + index * 18);
+          context.lineTo(inner.x + inner.width / 2 + iconSize * 0.28, inner.y + inner.height / 2 - iconSize * 0.42 + index * 18);
+          context.stroke();
+        }
+        context.fillStyle = layout.ink;
+        context.font = '900 27px "Microsoft YaHei", sans-serif';
+        context.textAlign = "center";
+        context.fillText("上传开单截图", inner.x + inner.width / 2, inner.y + inner.height / 2 + iconSize * 0.68);
+      }
+      context.restore();
+    }
+
+    function drawNativeTemplateFooter(context, theme) {
+      context.save();
+      const band = context.createLinearGradient(350, 0, 1250, 0);
+      band.addColorStop(0, colorWithAlpha(theme.accent, 0));
+      band.addColorStop(0.2, colorWithAlpha(theme.accent, 0.72));
+      band.addColorStop(0.8, colorWithAlpha(theme.accent, 0.72));
+      band.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = band;
+      context.fillRect(330, 812, 940, 2);
+      context.textAlign = "center";
+      context.fillStyle = colorWithAlpha(theme.text, 0.82);
+      context.font = '700 20px "Microsoft YaHei", sans-serif';
+      context.fillText("每一次签单，都是专业与信任的共同成果", 800, 842);
+      context.fillStyle = theme.style === "glacier" ? theme.accent : theme.accentLight;
+      context.font = '900 36px "STKaiti", "KaiTi", serif';
+      context.fillText("剑锋所指，势不可挡！", 800, 878);
+      context.restore();
+    }
+
+    function drawResponsiveNativeBackground(context, theme, variant) {
+      const width = context.canvas.width;
+      const height = context.canvas.height;
+      drawPhotoBackground(context, width, height, theme);
+
+      if (theme.style === "laurel") {
+        drawRibbonWaves(context, width, height, theme, 0.3);
+        drawUpwardChart(context, width, height, theme, 0.2);
+        drawLaurelWreath(context, width / 2, variant === "portrait" ? 170 : 160, Math.min(width, height) * 0.17, theme, 0.36);
+      } else if (theme.style === "tech") {
+        drawTechGrid(context, width, height, theme);
+        drawUpwardChart(context, width, height, theme, 0.34);
+      } else if (theme.style === "luxury") {
+        drawRibbonWaves(context, width, height, theme, 0.32);
+        drawTrophy(context, width * 0.14, height * 0.77, Math.min(width, height) * 0.1, theme, 0.44);
+        drawUpwardChart(context, width, height, theme, 0.2);
+      } else if (theme.style === "flame") {
+        drawRadialRays(context, width, height, theme, 0.14);
+        drawFlameField(context, width, height, theme);
+        drawRibbonWaves(context, width, height, theme, 0.34);
+      } else if (theme.style === "aurora") {
+        drawAuroraField(context, width, height, theme);
+        drawRibbonWaves(context, width, height, theme, 0.18);
+      } else if (theme.style === "nebula") {
+        drawNebulaField(context, width, height, theme);
+        drawUpwardChart(context, width, height, theme, 0.16);
+      } else if (theme.style === "glacier") {
+        drawGlacierField(context, width, height, theme);
+        drawUpwardChart(context, width, height, theme, 0.13);
+      } else if (theme.style === "rose") {
+        drawRoseField(context, width, height, theme);
+        drawRibbonWaves(context, width, height, theme, 0.2);
+      }
+
+      const glowRadius = Math.min(width, height) * 0.62;
+      const glow = context.createRadialGradient(width / 2, height * 0.14, 8, width / 2, height * 0.14, glowRadius);
+      glow.addColorStop(0, colorWithAlpha(theme.accentLight, 0.18));
+      glow.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height * 0.45);
+
+      context.strokeStyle = colorWithAlpha(theme.accent, 0.88);
+      context.lineWidth = 3;
+      context.strokeRect(12, 12, width - 24, height - 24);
+      context.strokeStyle = colorWithAlpha(theme.accentLight, 0.2);
+      context.lineWidth = 1;
+      context.strokeRect(22, 22, width - 44, height - 44);
+    }
+
+    function drawResponsiveNativeHeader(context, theme, layout, variant) {
+      const width = context.canvas.width;
+      const centerX = width / 2;
+      const portrait = variant === "portrait";
+      const titleY = portrait ? 142 : 150;
+      const subtitleY = portrait ? 178 : 186;
+      const ribbonY = portrait ? 208 : 216;
+      const ribbonX = portrait ? 92 : 80;
+      const ribbonWidth = width - ribbonX * 2;
+      const titleSize = theme.style === "tech" ? (portrait ? 92 : 98) : (portrait ? 112 : 120);
+      const ribbonTextSize = portrait ? 30 : 32;
+
+      context.save();
+      drawCanvasBrand(context, theme, 46, 28, portrait ? 0.9 : 0.94);
+
+      const titleGradient = context.createLinearGradient(centerX - width * 0.32, 0, centerX + width * 0.32, 0);
+      titleGradient.addColorStop(0, theme.accent);
+      titleGradient.addColorStop(0.5, theme.accentLight);
+      titleGradient.addColorStop(1, theme.accent);
+      context.fillStyle = titleGradient;
+      context.textAlign = "center";
+      context.shadowColor = colorWithAlpha(theme.background[0], 0.82);
+      context.shadowBlur = 16;
+      context.shadowOffsetY = 6;
+      context.font = `900 ${titleSize}px "STKaiti", "KaiTi", "Microsoft YaHei", serif`;
+      context.fillText(layout.title, centerX, titleY);
+      context.shadowColor = "transparent";
+
+      context.fillStyle = colorWithAlpha(theme.text, 0.92);
+      context.font = '800 18px Arial, sans-serif';
+      context.fillText(layout.subtitle, centerX, subtitleY);
+
+      const ribbon = context.createLinearGradient(ribbonX, 0, ribbonX + ribbonWidth, 0);
+      ribbon.addColorStop(0, colorWithAlpha(theme.header || theme.plane, 0.16));
+      ribbon.addColorStop(0.16, colorWithAlpha(layout.header, 0.94));
+      ribbon.addColorStop(0.84, colorWithAlpha(layout.header, 0.94));
+      ribbon.addColorStop(1, colorWithAlpha(theme.header || theme.plane, 0.16));
+      fillRoundedRect(context, ribbonX, ribbonY, ribbonWidth, 54, 7, ribbon);
+      strokeRoundedRect(context, ribbonX, ribbonY, ribbonWidth, 54, 7, colorWithAlpha(theme.accent, 0.86), 2);
+      context.fillStyle = theme.accentLight;
+      context.font = `900 ${ribbonTextSize}px "STKaiti", "KaiTi", "Microsoft YaHei", serif`;
+      context.fillText("剑锋所指，势不可挡！", centerX, ribbonY + 37);
+      context.restore();
+    }
+
+    function drawResponsiveNativeFooter(context, theme) {
+      const width = context.canvas.width;
+      const height = context.canvas.height;
+      const lineY = height - 82;
+      context.save();
+      const band = context.createLinearGradient(width * 0.12, 0, width * 0.88, 0);
+      band.addColorStop(0, colorWithAlpha(theme.accent, 0));
+      band.addColorStop(0.2, colorWithAlpha(theme.accent, 0.72));
+      band.addColorStop(0.8, colorWithAlpha(theme.accent, 0.72));
+      band.addColorStop(1, colorWithAlpha(theme.accent, 0));
+      context.fillStyle = band;
+      context.fillRect(width * 0.1, lineY, width * 0.8, 2);
+      context.textAlign = "center";
+      context.fillStyle = colorWithAlpha(theme.text, 0.84);
+      context.font = '700 18px "Microsoft YaHei", sans-serif';
+      context.fillText("每一次签单，都是专业与信任的共同成果", width / 2, lineY + 28);
+      context.fillStyle = theme.style === "glacier" ? theme.accent : theme.accentLight;
+      context.font = '900 30px "STKaiti", "KaiTi", serif';
+      context.fillText("剑锋所指，势不可挡！", width / 2, lineY + 62);
+      context.restore();
+    }
+
+    function drawNativeTemplateReport(context, portrait, employee, theme) {
+      const layout = nativeTemplateLayouts[theme.style];
+      const canvasWidth = context.canvas.width;
+      const canvasHeight = context.canvas.height;
+      const baseGradient = context.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+      baseGradient.addColorStop(0, theme.background[0]);
+      baseGradient.addColorStop(0.55, theme.background[1]);
+      baseGradient.addColorStop(1, theme.background[2]);
+      context.fillStyle = baseGradient;
+      context.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      if (state.ratio === "landscape") {
+        const scale = Math.min(canvasWidth / 1600, canvasHeight / 900);
+        const offsetX = (canvasWidth - 1600 * scale) / 2;
+        const offsetY = (canvasHeight - 900 * scale) / 2;
+        context.save();
+        context.translate(offsetX, offsetY);
+        context.scale(scale, scale);
+        drawNativeTemplateBackground(context, theme, layout);
+        drawNativeTemplateHeader(context, theme, layout);
+        drawNativePortraitCard(context, portrait, employee, layout.portrait, theme, layout);
+        drawNativeInfoPanel(context, layout.info, employee, theme, layout);
+        drawNativeScreenshotCard(context, layout.screenshot, state.screenshot, state.fit, theme, layout);
+        drawNativeTemplateFooter(context, theme);
+        context.restore();
+        return;
+      }
+
+      const variant = state.ratio === "portrait" ? "portrait" : "square";
+      const responsiveLayout = variant === "portrait"
+        ? {
+            portrait: { x: (canvasWidth - 420) / 2, y: 300, width: 420, height: 380 },
+            info: { x: 60, y: 710, width: canvasWidth - 120, height: 300 },
+            screenshot: { x: 60, y: 1040, width: canvasWidth - 120, height: 300 }
+          }
+        : {
+            portrait: { x: 54, y: 300, width: 330, height: 360 },
+            info: { x: 414, y: 304, width: canvasWidth - 468, height: 356 },
+            screenshot: { x: 54, y: 700, width: canvasWidth - 108, height: 380 }
+          };
+
+      context.save();
+      drawResponsiveNativeBackground(context, theme, variant);
+      drawResponsiveNativeHeader(context, theme, layout, variant);
+      drawNativePortraitCard(context, portrait, employee, responsiveLayout.portrait, theme, layout);
+      drawNativeInfoPanel(context, responsiveLayout.info, employee, theme, layout);
+      drawNativeScreenshotCard(context, responsiveLayout.screenshot, state.screenshot, state.fit, theme, layout);
+      drawResponsiveNativeFooter(context, theme);
+      context.restore();
+    }
+
+    let thumbnailPortrait = null;
+
+    function renderThemeThumbnails() {
+      if (!thumbnailPortrait) return;
+      const snapshot = {
+        employee: state.employee,
+        amount: state.amount,
+        currency: state.currency,
+        customer: state.customer,
+        date: state.date,
+        ratio: state.ratio,
+        theme: state.theme,
+        fit: state.fit,
+        screenshot: state.screenshot,
+        screenshotName: state.screenshotName
+      };
+      const previewEmployee = employees[snapshot.employee] || Object.values(employees)[0];
+      if (!previewEmployee) return;
+      const previewRatio = ratios[snapshot.ratio] || ratios.landscape;
+      const previewCanvas = document.createElement("canvas");
+      previewCanvas.width = previewRatio.width;
+      previewCanvas.height = previewRatio.height;
+      const previewContext = previewCanvas.getContext("2d");
+      state.employee = snapshot.employee;
+      state.amount = snapshot.amount;
+      state.currency = snapshot.currency;
+      state.customer = snapshot.customer;
+      state.date = snapshot.date;
+      state.ratio = snapshot.ratio;
+      state.fit = "cover";
+      state.screenshot = null;
+      state.screenshotName = "";
+
+      themeGrid.querySelectorAll("button[data-theme]").forEach((button) => {
+        const theme = themes[button.dataset.theme];
+        if (!theme || !theme.nativeTemplate) return;
+        state.theme = button.dataset.theme;
+        drawNativeTemplateReport(previewContext, thumbnailPortrait, previewEmployee, theme);
+        const preview = button.querySelector(".theme-preview");
+        if (preview) {
+          preview.style.backgroundImage = `url("${previewCanvas.toDataURL("image/jpeg", 0.84)}")`;
+          preview.classList.add("is-rendered");
+        }
+      });
+
+      Object.assign(state, snapshot);
+    }
+
+    function applyCanvasSettings() {
+      const ratio = ratios[state.ratio];
+      canvas.width = ratio.width;
+      canvas.height = ratio.height;
+      canvasWrap.style.aspectRatio = `${ratio.width} / ${ratio.height}`;
+      canvasWrap.style.width = `min(100%, calc((100vh - 156px) * ${ratio.width / ratio.height}))`;
+      previewMeta.textContent = `${ratio.name}画布 · ${ratio.width} × ${ratio.height} px`;
+    }
+
+    function selectRatio(ratioKey) {
+      state.ratio = ratioKey;
+      ratioSegment.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.ratio === ratioKey;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      applyCanvasSettings();
+    }
+
+    async function drawReport() {
+      drawQueued = false;
+      const employee = employees[state.employee] || Object.values(employees)[0];
+      if (!employee) throw new Error("请先在后台添加员工");
+      const portrait = await loadImage(employee.src);
+      const theme = themes[state.theme];
+      if (theme.nativeTemplate) {
+        drawNativeTemplateReport(ctx, portrait, employee, theme);
+        return;
+      }
+      const layout = getPremiumLayout(state.ratio);
+      drawPremiumBackground(ctx, canvas.width, canvas.height, theme, layout);
+      drawPremiumTitle(ctx, layout.title, theme);
+      drawPremiumPortrait(ctx, portrait, employee, layout.portrait, theme);
+      drawPremiumAnnouncement(ctx, layout.announcement, employee.name, state.customer, theme);
+      drawPremiumAmount(
+        ctx,
+        layout.amount,
+        formatRmbAmount(state.amount),
+        "RMB",
+        state.customer,
+        formatReportDate(state.date),
+        theme
+      );
+      drawPremiumScreenshot(ctx, layout.screenshot, state.screenshot, state.fit, theme);
+      drawPremiumFooter(ctx, canvas.width, canvas.height, layout.footerY, theme, state.ratio);
+    }
+
+    function requestDraw() {
+      if (drawQueued) return;
+      drawQueued = true;
+      const runDraw = () => {
+        if (!drawQueued) return;
+        drawQueued = false;
+        drawReport().catch(() => showToast("图片载入失败，请刷新后重试"));
+      };
+      window.requestAnimationFrame(runDraw);
+      window.setTimeout(runDraw, 80);
+    }
+
+    function readImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleScreenshot(file) {
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("请选择图片文件");
+        return;
+      }
+      try {
+        state.screenshot = await readImageFile(file);
+        state.screenshotName = file.name;
+        uploadZone.classList.add("has-file");
+        uploadTitle.textContent = "截图已载入";
+        uploadHint.textContent = file.name;
+        requestDraw();
+      } catch {
+        showToast("截图读取失败，请换一张图片重试");
+      }
+    }
+
+    function canvasBlob() {
+      return new Promise((resolve, reject) => {
+        try {
+          canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("empty blob")), "image/png", 1);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function saveReportRecord(blob) {
+      const employee = employees[state.employee] || Object.values(employees)[0];
+      const copyText = copyOutput.value || generateOrderCopy();
+      return api("/api/reports", {
+        method: "POST",
+        body: JSON.stringify({
+          employeeId: state.employee,
+          employeeName: employee?.name || state.employee,
+          employeeImage: employee?.src || "",
+          amount: state.amount,
+          currency: state.currency,
+          amountRmb: amountToRmb(state.amount, state.currency),
+          cumulativeAmount: state.cumulativeAmount,
+          cumulativeCurrency: state.cumulativeCurrency,
+          cumulativeRmb: amountToRmb(state.cumulativeAmount || state.amount, state.cumulativeCurrency),
+          customer: state.customer,
+          reportDate: state.date,
+          ratio: state.ratio,
+          theme: state.theme,
+          screenshotName: state.screenshotName,
+          copyText,
+          imageData: await blobToDataUrl(blob)
+        })
+      });
+    }
+
+    async function saveReport() {
+      try {
+        await drawReport();
+        const blob = await canvasBlob();
+        await saveReportRecord(blob);
+        showToast("战报已保存到后台");
+      } catch (error) {
+        showToast(error.message || "战报保存失败");
+      }
+    }
+
+    async function saveCopyRecord(copyText) {
+      const employee = employees[state.employee] || Object.values(employees)[0];
+      return api("/api/copies", {
+        method: "POST",
+        body: JSON.stringify({
+          employeeId: state.employee,
+          employeeName: employee?.name || state.employee,
+          amountRmb: amountToRmb(state.amount, state.currency),
+          cumulativeRmb: amountToRmb(state.cumulativeAmount || state.amount, state.cumulativeCurrency),
+          customer: state.customer,
+          reportDate: state.date,
+          copyText
+        })
+      });
+    }
+
+    async function generateAndSaveCopy() {
+      const copyText = generateOrderCopy();
+      try {
+        await saveCopyRecord(copyText);
+        showToast("新文案已生成并保存");
+      } catch (error) {
+        showToast(error.message || "文案已生成，后台保存失败");
+      }
+    }
+
+    async function downloadReport() {
+      try {
+        await drawReport();
+        const blob = await canvasBlob();
+        const employee = employees[state.employee] || Object.values(employees)[0];
+        const link = document.createElement("a");
+        const datePart = (state.date || localToday()).replace(/-/g, "");
+        link.href = URL.createObjectURL(blob);
+        link.download = `销售战报中心战报-${employee?.name || state.employee}-${datePart}.png`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(link.href), 1500);
+        try {
+          await saveReportRecord(blob);
+          showToast("战报已下载并保存到后台");
+        } catch {
+          showToast("PNG 已下载，后台保存失败");
+        }
+      } catch (error) {
+        showToast(error.message || "导出受浏览器限制，请使用复制图片或换浏览器打开");
+      }
+    }
+
+    async function copyReport() {
+      if (!navigator.clipboard || !window.ClipboardItem) {
+        showToast("当前浏览器不支持复制图片，请直接下载 PNG");
+        return;
+      }
+      try {
+        await drawReport();
+        const blob = await canvasBlob();
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        showToast("战报图片已复制");
+      } catch {
+        showToast("复制未完成，请使用下载 PNG");
+      }
+    }
+
+    function resetForm() {
+      state.employee = getDefaultEmployeeId();
+      state.amount = "100.00";
+      state.cumulativeAmount = "100.00";
+      cumulativeManuallyEdited = false;
+      state.currency = "USD";
+      state.cumulativeCurrency = "USD";
+      state.customer = "新客户";
+      state.date = localToday();
+      state.ratio = "landscape";
+      state.theme = "emeraldLaurel";
+      state.fit = "cover";
+      state.screenshot = null;
+      state.screenshotName = "";
+      amountInput.value = state.amount;
+      cumulativeInput.value = state.cumulativeAmount;
+      updateRmbConversionPreview();
+      dateInput.value = state.date;
+      screenshotInput.value = "";
+      uploadZone.classList.remove("has-file");
+      uploadTitle.textContent = "上传订单截图";
+      uploadHint.textContent = "支持 PNG、JPG、WebP";
+
+      employeeGrid.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.employee === state.employee;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      customerSegment.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.customer === state.customer;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      currencySegment.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.currency === state.currency;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      cumulativeCurrencySegment.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.currency === state.cumulativeCurrency;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      ratioSegment.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.ratio === state.ratio;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      themeGrid.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.theme === state.theme;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      fitSegment.querySelectorAll("button").forEach((button) => {
+        const active = button.dataset.fit === state.fit;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      applyCanvasSettings();
+      renderThemeThumbnails();
+      generateOrderCopy();
+      requestDraw();
+      showToast("内容已重置");
+    }
+
+    employeeGrid.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-employee]");
+      if (!button) return;
+      state.employee = button.dataset.employee;
+      employeeGrid.querySelectorAll("button").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      renderThemeThumbnails();
+      generateOrderCopy();
+      requestDraw();
+    });
+
+    currencySegment.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-currency]");
+      if (!button) return;
+      state.currency = button.dataset.currency;
+      if (!cumulativeManuallyEdited) {
+        state.cumulativeCurrency = state.currency;
+        cumulativeCurrencySegment.querySelectorAll("button").forEach((item) => {
+          const active = item.dataset.currency === state.cumulativeCurrency;
+          item.classList.toggle("is-active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
+      }
+      updateRmbConversionPreview();
+      currencySegment.querySelectorAll("button").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      generateOrderCopy();
+      requestDraw();
+    });
+
+    cumulativeCurrencySegment.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-currency]");
+      if (!button) return;
+      cumulativeManuallyEdited = true;
+      state.cumulativeCurrency = button.dataset.currency;
+      cumulativeCurrencySegment.querySelectorAll("button").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      updateRmbConversionPreview();
+      generateOrderCopy();
+    });
+
+    customerSegment.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-customer]");
+      if (!button) return;
+      state.customer = button.dataset.customer;
+      customerSegment.querySelectorAll("button").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      generateOrderCopy();
+      requestDraw();
+    });
+
+    dateInput.addEventListener("change", () => {
+      state.date = dateInput.value || localToday();
+      generateOrderCopy();
+      requestDraw();
+    });
+
+    ratioSegment.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-ratio]");
+      if (!button) return;
+      selectRatio(button.dataset.ratio);
+      requestDraw();
+    });
+
+    themeGrid.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-theme]");
+      if (!button) return;
+      state.theme = button.dataset.theme;
+      themeGrid.querySelectorAll("button").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      renderThemeThumbnails();
+      requestDraw();
+    });
+
+    fitSegment.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-fit]");
+      if (!button) return;
+      state.fit = button.dataset.fit;
+      fitSegment.querySelectorAll("button").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      requestDraw();
+    });
+
+    amountInput.addEventListener("input", () => {
+      const sanitized = amountInput.value.replace(/,/g, "").replace(/[^0-9.]/g, "");
+      const firstDot = sanitized.indexOf(".");
+      const normalized = firstDot === -1
+        ? sanitized
+        : sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, "").slice(0, 2);
+      if (amountInput.value !== normalized) amountInput.value = normalized;
+      state.amount = normalized || "0";
+      if (!cumulativeManuallyEdited) {
+        state.cumulativeAmount = state.amount;
+        cumulativeInput.value = state.cumulativeAmount;
+      }
+      updateRmbConversionPreview();
+      generateOrderCopy();
+      requestDraw();
+    });
+
+    amountInput.addEventListener("blur", () => {
+      state.amount = formatAmount(state.amount).replace(/,/g, "");
+      amountInput.value = state.amount;
+      if (!cumulativeManuallyEdited) {
+        state.cumulativeAmount = state.amount;
+        cumulativeInput.value = state.cumulativeAmount;
+      }
+      updateRmbConversionPreview();
+      generateOrderCopy();
+      requestDraw();
+    });
+
+    cumulativeInput.addEventListener("input", () => {
+      const sanitized = cumulativeInput.value.replace(/,/g, "").replace(/[^0-9.]/g, "");
+      const firstDot = sanitized.indexOf(".");
+      const normalized = firstDot === -1
+        ? sanitized
+        : sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, "").slice(0, 2);
+      if (cumulativeInput.value !== normalized) cumulativeInput.value = normalized;
+      cumulativeManuallyEdited = true;
+      state.cumulativeAmount = normalized || "0";
+      updateRmbConversionPreview();
+      generateOrderCopy();
+    });
+
+    cumulativeInput.addEventListener("blur", () => {
+      state.cumulativeAmount = formatAmount(state.cumulativeAmount).replace(/,/g, "");
+      cumulativeInput.value = state.cumulativeAmount;
+      updateRmbConversionPreview();
+      generateOrderCopy();
+    });
+
+    screenshotInput.addEventListener("change", () => handleScreenshot(screenshotInput.files[0]));
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      uploadZone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        uploadZone.classList.add("is-dragging");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      uploadZone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        uploadZone.classList.remove("is-dragging");
+      });
+    });
+
+    uploadZone.addEventListener("drop", (event) => handleScreenshot(event.dataTransfer.files[0]));
+    document.getElementById("downloadButton").addEventListener("click", downloadReport);
+    document.getElementById("downloadTopButton").addEventListener("click", downloadReport);
+    document.getElementById("saveButton").addEventListener("click", saveReport);
+    document.getElementById("saveTopButton").addEventListener("click", saveReport);
+    document.getElementById("copyButton").addEventListener("click", copyReport);
+    document.getElementById("copyMobileButton").addEventListener("click", copyReport);
+    document.getElementById("resetButton").addEventListener("click", resetForm);
+    generateCopyButton.addEventListener("click", generateAndSaveCopy);
+    copyTextButton.addEventListener("click", copyOrderCopy);
+
+    dateInput.value = state.date;
+    cumulativeInput.value = state.cumulativeAmount;
+    updateRmbConversionPreview();
+    generateOrderCopy();
+    applyCanvasSettings();
+
+    async function initializeApp() {
+      renderEmployeeGrid();
+      try {
+        brandLogo = await loadImage(BRAND_LOGO_SRC);
+        reportBg = await loadImage("assets/report-bg.jpg");
+        thumbnailPortrait = await loadImage(employees[state.employee].src);
+        renderThemeThumbnails();
+        requestDraw();
+      } catch {
+        showToast("员工照片载入失败，请检查 assets 文件夹");
+      }
+      await refreshEmployees({ silent: true });
+    }
+
+    window.addEventListener("focus", () => refreshEmployees({ silent: true }));
+    initializeApp();
+  </script>
+</body>
+</html>
+

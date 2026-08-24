@@ -1,0 +1,38 @@
+[
+  {
+    "id": "sample",
+    "name": "Bella Ling",
+    "image": "data/uploads/employee-image-msyrpqa4-bella-ling-tumyh.png",
+    "positionY": 0.61,
+    "updatedAt": "2026-08-18T14:38:35.593Z"
+  },
+  {
+    "id": "employee-msyrq5m7-miguel-yang-n40un",
+    "name": "Miguel Yang",
+    "image": "data/uploads/employee-msyrq5m7-miguel-yang-n40un.png",
+    "positionY": 0.07,
+    "createdAt": "2026-08-18T14:38:55.471Z"
+  },
+  {
+    "id": "employee-msyrqshk-leon-ling-clrri",
+    "name": "Leon Ling",
+    "image": "data/uploads/employee-msyrqshk-leon-ling-clrri.png",
+    "positionY": 0.05,
+    "createdAt": "2026-08-18T14:39:25.113Z"
+  },
+  {
+    "id": "employee-msyrr33r-penny-yang-0abio",
+    "name": "Penny Yang",
+    "image": "data/uploads/employee-msyrr33r-penny-yang-0abio.png",
+    "positionY": 0.05,
+    "createdAt": "2026-08-18T14:39:38.871Z"
+  },
+  {
+    "id": "employee-mt2phx86-bella-3712s",
+    "name": "Bella",
+    "image": "data/uploads/employee-image-mt71p4iu-bella-w890y.jpg",
+    "positionY": 0.05,
+    "createdAt": "2026-08-21T08:47:36.822Z",
+    "updatedAt": "2026-08-24T09:40:12.966Z"
+  }
+]

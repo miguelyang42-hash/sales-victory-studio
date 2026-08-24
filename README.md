@@ -1,21 +1,58 @@
 # Sales Victory Studio
 
-独立复刻的销售战报生成器，基于源站 `销售战报中心 · 战报生成器` 的真实页面和 API 契约实现。项目不依赖旧的 `knowledge_hub`。
+基于真实源站 `销售战报中心 · 战报生成器` 备份迁移的安全云端版。保留原 `index.html`、`admin.html` 的页面结构、Canvas 绘制、8 套模板、字段和 API 契约；不依赖局域网本地 JSON。
 
 ## 功能
 
-- 员工选择、USD/RMB 金额与累计金额、客户类型、日期
-- 竖版 / 方形 / 横版 Canvas 画布
-- 8 个视觉模板：翡翠荣耀、科技蓝光、鎏金荣耀、烈焰战魂、极光星海、紫曜银河、冰川银辉、玫瑰曜石
-- 订单截图导入、cover/contain 适配
-- Canvas 实时预览、生成 PNG、保存战报、复制图片、复制文案
-- 员工、战报、文案、summary API 兼容层
-- 写操作通过 `x-admin-key` 保护；读取接口可公开
-- 可选 Supabase REST 持久化；未配置时使用实例内存，仅适合预览
+- 5 名员工与原始员工头像资源
+- USD/RMB 金额与累计金额，USD 汇率 6.7
+- 新客户/老客户、日期、竖版/方形/横版
+- 原始 8 套模板、cover/contain 截图适配、拖拽上传
+- Canvas 预览、PNG 下载、战报保存、图片复制、确定性文案生成/复制
+- `admin.html` 员工管理、战报/文案历史、统计
+- Supabase PostgREST 表持久化和 Storage 对象存储
+- 所有 POST/PATCH/PUT/DELETE 通过 `x-admin-key` 或当前会话密钥保护
 
-## 运行
+## 环境变量
 
-静态页面可直接打开 `public/index.html`。生产部署使用 Vercel：
+只在 Vercel Project Settings 配置，不要写入仓库：
+
+- `ADMIN_API_KEY`：高熵管理员密钥；前端只通过当前浏览器 `sessionStorage` 保存会话值
+- `SUPABASE_URL`：Supabase Project URL
+- `SUPABASE_SERVICE_ROLE_KEY`：Supabase service role secret，绝不能暴露到前端
+- 可选：`SUPABASE_EMPLOYEES_TABLE`、`SUPABASE_REPORTS_TABLE`、`SUPABASE_COPIES_TABLE`
+
+## Supabase 建表 SQL
+
+```sql
+create table if not exists public.employees (
+  id text primary key, name text not null, image text, "positionY" numeric,
+  "createdAt" timestamptz default now(), "updatedAt" timestamptz default now()
+);
+create table if not exists public.reports (
+  id text primary key, "employeeId" text, "employeeName" text, "employeeImage" text,
+  amount text, currency text, "amountRmb" numeric, "cumulativeAmount" text,
+  "cumulativeCurrency" text, "cumulativeRmb" numeric, customer text,
+  "reportDate" date, ratio text, theme text, "screenshotName" text,
+  "copyText" text, image text, "createdAt" timestamptz default now()
+);
+create table if not exists public.copies (
+  id text primary key, "employeeId" text, "employeeName" text,
+  "amountRmb" numeric, "cumulativeRmb" numeric, customer text,
+  "reportDate" date, "copyText" text, "createdAt" timestamptz default now()
+);
+insert into public.employees (id,name,"positionY") values
+('sample','Bella Ling',0.61),
+('employee-msyrq5m7-miguel-yang-n40un','Miguel Yang',0.07),
+('employee-msyrqshk-leon-ling-clrri','Leon Ling',0.05),
+('employee-msyrr33r-penny-yang-0abio','Penny Yang',0.05),
+('employee-mt2phx86-bella-3712s','Bella',0.05)
+on conflict (id) do nothing;
+```
+
+Create public Storage buckets named `assets` and `reports`. Keep service-role access server-side; public read is required only for report/employee image URLs. Add Storage policies according to your organization policy, or proxy downloads through an authenticated endpoint.
+
+## Deploy
 
 ```bash
 npm install
@@ -23,25 +60,11 @@ npm run build
 vercel --prod
 ```
 
-## 环境变量
+Vercel rewrites `/` to `public/index.html`, `/admin.html` to `public/admin.html`, and `/api/*` to the Node serverless handler. After setting variables, redeploy and verify `/api/health` returns `persistence: supabase` and `storage: supabase-storage`.
 
-复制 `.env.example` 并在 Vercel Project Settings 配置：
+## Verification and maintenance
 
-- `ADMIN_API_KEY`：写操作必需，绝不能提交到仓库
-- `SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`：启用持久化时必填
-- `SUPABASE_*_TABLE`：可选表名覆盖
-
-Supabase 建议建立 `employees`、`reports`、`copies` 表；`reports` 至少包含 JSON 请求中的字段，`copies` 同理。生产环境应为 service role key 配置最小化访问策略，并使用独立项目。
-
-## API
-
-- `GET /api/health`
-- `GET /api/employees`
-- `POST/PATCH/DELETE /api/employees/:id`（需 `x-admin-key`）
-- `GET/POST/DELETE /api/reports`（写操作需 key）
-- `GET/POST/DELETE /api/copies`（写操作需 key）
-- `GET /api/summary`
-
-## 安全与维护
-
-不要把密钥写进前端、提交到 Git 或放入截图。定期轮换 `ADMIN_API_KEY` 与 Supabase service role key；查看 Vercel Function Logs；为 Supabase 配置备份和 RLS；生产环境建议绑定自有域名并启用强制 HTTPS（Vercel 默认提供 HTTPS）。
+- `GET /api/health`, `/api/employees`, `/api/reports`, `/api/copies`, `/api/summary` are read checks.
+- Every write must carry `x-admin-key`; no-key requests return 401.
+- Create a uniquely titled test report, GET it again with a cache-buster, then delete it and verify it is gone.
+- Back up Supabase tables and Storage objects; rotate `ADMIN_API_KEY` and service-role credentials periodically; inspect Vercel Function Logs; never commit `.env` or secrets.
